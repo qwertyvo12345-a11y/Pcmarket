@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PC Маркет</title>
+<meta name="theme-color" content="#d2440a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* Layout: sticky top bar, scrolling single column, fixed bottom tab bar, bottom sheets for details and pickers */
+:root{
+  --bg:#eef0f2; --surface:#ffffff; --surface2:#e4e8eb; --fg:#15181c; --muted:#56606a; --line:#d2d8dd;
+  --accent:#d2440a; --accent-fg:#ffffff; --ok:#157347; --warn:#965800; --err:#c1272d;
+  --tl:93%; --ti:34%; --navh:64px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1215; --surface:#171b1f; --surface2:#20252a; --fg:#e9ecef; --muted:#98a2ac; --line:#2b323a;
+    --accent:#ff7d45; --accent-fg:#1c0c04; --ok:#4cc38a; --warn:#e8a63f; --err:#ff7070; --tl:20%; --ti:72%;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1215; --surface:#171b1f; --surface2:#20252a; --fg:#e9ecef; --muted:#98a2ac; --line:#2b323a;
+  --accent:#ff7d45; --accent-fg:#1c0c04; --ok:#4cc38a; --warn:#e8a63f; --err:#ff7070; --tl:20%; --ti:72%;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font:15px/1.45 var(--sans);-webkit-text-size-adjust:100%}
+body.lock{overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+h1{font-size:1.35rem;line-height:1.2;letter-spacing:-.01em}
+h2{font-size:1.15rem;line-height:1.25}
+h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.sm{font-size:.82rem}
+.nowrap{white-space:nowrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:10px;height:56px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.08rem;letter-spacing:-.01em;margin-right:auto}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
+.ib{position:relative;width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer}
+.ib:active{background:var(--surface2)}
+.badge{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--accent-fg);font:700 .7rem/18px var(--mono);text-align:center}
+.badge:empty{display:none}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav .wrap{display:grid;grid-template-columns:repeat(5,1fr);height:var(--navh)}
+.nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.68rem;font-weight:600;color:var(--muted);cursor:pointer;min-width:0}
+.nav button[aria-current="page"]{color:var(--accent)}
+main{padding-top:14px;padding-bottom:calc(var(--navh) + 28px + env(safe-area-inset-bottom,0px))}
+main.has-bar{padding-bottom:calc(var(--navh) + 96px + env(safe-area-inset-bottom,0px))}
+.stack{display:flex;flex-direction:column;gap:14px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid transparent;background:var(--accent);color:var(--accent-fg);font-weight:700;cursor:pointer;text-align:center}
+.btn:active{filter:brightness(.92)}
+.btn.sec{background:var(--surface);color:var(--fg);border-color:var(--line)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.btn.s{min-height:38px;padding:0 12px;font-size:.88rem;border-radius:10px}
+.btn.block{width:100%}
+.btn.danger{background:transparent;color:var(--err);border-color:var(--err)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:.78rem;font-weight:700;color:var(--muted)}
+input[type=text],input[type=search],input[type=tel],input[type=number],select,textarea{width:100%;min-height:44px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);min-width:0}
+textarea{min-height:84px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search input{padding-left:40px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:38px;padding:0 14px;border-radius:19px;border:1px solid var(--line);background:var(--surface);font-size:.88rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.row{display:flex;gap:10px;align-items:center}
+.row.wrap2{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+
+/* tiles */
+.tile{display:grid;place-items:center;border-radius:12px;background:hsl(var(--h) 55% var(--tl));color:hsl(var(--h) 60% var(--ti));flex:none}
+.t-cpu{--h:18}.t-mb{--h:150}.t-ram{--h:200}.t-gpu{--h:275}.t-ssd{--h:215}.t-hdd{--h:40}.t-cooler{--h:185}.t-psu{--h:50}.t-case{--h:330}
+
+/* product grid */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.pc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0;cursor:pointer}
+.pc .tile{height:76px;position:relative}
+.tag{position:absolute;left:6px;top:6px;font-size:.66rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:var(--fg);color:var(--bg)}
+.tag.sale{background:var(--accent);color:var(--accent-fg)}
+.brand-l{font:700 .68rem var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pname{font-weight:700;font-size:.9rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.pspec{font-size:.76rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.3em}
+.price{font:700 1rem var(--mono);white-space:nowrap}
+.old{font:.75rem var(--mono);color:var(--muted);text-decoration:line-through;white-space:nowrap}
+.pfoot{display:flex;align-items:center;gap:6px;margin-top:auto}
+.pfoot .btn{flex:1}
+.hbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;flex:none}
+.hbtn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+.hbtn[aria-pressed="true"] svg{fill:currentColor}
+.stock{font-size:.72rem;font-weight:700}
+.stock.in{color:var(--ok)}.stock.order{color:var(--warn)}
+
+/* list rows */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:12px;align-items:center;padding:12px;border-bottom:1px solid var(--line);min-width:0;cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;text-align:left;width:100%}
+.li:last-child{border-bottom:0}
+.li .tile{width:48px;height:48px}
+.li.dis{opacity:.55}
+.li-t{font-weight:700;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}
+.li-s{font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
+.why{font-size:.76rem;color:var(--err);font-weight:600}
+
+/* builder */
+.score{padding:14px;display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:10px;font-size:.8rem}
+.bar i{display:block;height:8px;border-radius:4px;background:var(--surface2);overflow:hidden}
+.bar b{display:block;height:100%;background:var(--accent);border-radius:4px}
+.bar span{font-family:var(--mono);text-align:right}
+.bar span:first-child{font-family:var(--sans);text-align:left;color:var(--muted);font-weight:600}
+.slot{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;width:100%;background:none;border-top:0;border-left:0;border-right:0;text-align:left;min-width:0}
+.slot:last-child{border-bottom:0}
+.slot .tile{width:44px;height:44px;opacity:.9}
+.slot.vac .tile{background:transparent;border:1.5px dashed var(--line);color:var(--muted)}
+.slot.bad{background:color-mix(in srgb,var(--err) 9%,transparent)}
+.slot-n{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.slot-v{font-weight:700;font-size:.9rem;line-height:1.25;overflow-wrap:anywhere}
+.slot-add{color:var(--accent);font-weight:700;font-size:.9rem}
+.rm{width:36px;height:36px;border-radius:10px;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;flex:none;cursor:pointer}
+.ck{display:flex;gap:10px;padding:9px 12px;align-items:flex-start;font-size:.86rem;border-bottom:1px solid var(--line)}
+.ck:last-child{border-bottom:0}
+.ck svg{flex:none;margin-top:2px}
+.ck.ok svg{color:var(--ok)}.ck.warn svg{color:var(--warn)}.ck.err svg{color:var(--err)}.ck.info svg,.ck.todo svg{color:var(--muted)}
+.ck.err{font-weight:600}
+.buybar{position:fixed;left:0;right:0;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px));z-index:15;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.08)}
+.buybar .wrap{display:flex;align-items:center;gap:12px;padding-top:10px;padding-bottom:10px}
+.st{font-size:.76rem;font-weight:700;display:flex;align-items:center;gap:5px}
+.st.ok{color:var(--ok)}.st.warn{color:var(--warn)}.st.err{color:var(--err)}.st.todo{color:var(--muted)}
+.total{font:800 1.2rem var(--mono);white-space:nowrap}
+
+/* presets */
+.preset{padding:14px;display:flex;flex-direction:column;gap:10px}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:10px;background:var(--surface2);color:var(--muted)}
+.parts{display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--muted)}
+.parts div{display:flex;gap:8px;justify-content:space-between}
+.parts span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* used */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom,0px));z-index:14;min-height:52px;border-radius:26px;box-shadow:0 6px 18px rgba(0,0,0,.25);padding:0 20px}
+.cond{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:8px;border:1px solid currentColor}
+.cond.c0{color:var(--ok)}.cond.c1{color:var(--ok)}.cond.c2{color:var(--warn)}.cond.c3{color:var(--err)}
+.note{padding:12px 14px;border-radius:12px;background:var(--surface2);font-size:.84rem;color:var(--muted)}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.scrim{position:absolute;inset:0;background:rgba(5,8,10,.55)}
+.panel{position:relative;width:100%;max-width:760px;max-height:92%;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);border-radius:20px 20px 0 0;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+.sh-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.specs{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
+.specs dt,.specs dd{margin:0;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.specs dt{color:var(--muted);padding-right:16px}
+.specs dd{font-weight:600;text-align:right;overflow-wrap:anywhere}
+.det-tile{height:110px;border-radius:14px;display:grid;place-items:center}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.qty button{width:38px;height:38px;border:0;background:none;font-size:1.2rem;cursor:pointer}
+.qty span{min-width:26px;text-align:center;font:700 .9rem var(--mono)}
+.sumrow{display:flex;justify-content:space-between;gap:10px;padding:4px 0}
+.sumrow.big{font-weight:800;font-size:1.1rem;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1;min-height:38px;padding:0 12px;border:0;border-radius:9px;background:none;font-weight:700;font-size:.84rem;color:var(--muted);cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+.empty svg{opacity:.6;margin-bottom:8px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + 84px + env(safe-area-inset-bottom,0px));z-index:60;max-width:min(92vw,420px);background:var(--fg);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center}
+#toast.on{opacity:1}
+@media (min-width:700px){.pgrid{grid-template-columns:repeat(auto-fill,minmax(176px,1fr))}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}#toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span class="logo" id="logo"></span><span>PC Маркет</span></div>
+  <button class="ib" data-act="theme" aria-label="Сменить тему" id="themeBtn"></button>
+  <button class="ib" data-act="tab" data-v="cart" aria-label="Корзина" id="cartBtn"><span class="badge" id="cartBadge"></span></button>
+</div></header>
+<main class="wrap" id="view"></main>
+<nav class="nav" aria-label="Разделы"><div class="wrap" id="nav"></div></nav>
+<div class="sheet" id="sheet" hidden><div class="scrim" data-act="close"></div><div class="panel" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* ============================ DATA ============================ */
+const CATS=[
+ {id:'cpu',n:'Процессоры',s:'Процессор'},
+ {id:'mb',n:'Материнские платы',s:'Мат. плата'},
+ {id:'ram',n:'Оперативная память',s:'Память'},
+ {id:'gpu',n:'Видеокарты',s:'Видеокарта'},
+ {id:'ssd',n:'SSD',s:'SSD'},
+ {id:'hdd',n:'HDD',s:'HDD'},
+ {id:'cooler',n:'Охлаждение',s:'Кулер'},
+ {id:'psu',n:'Блоки питания',s:'Блок питания'},
+ {id:'case',n:'Корпуса',s:'Корпус'}
+];
+const REQ=['cpu','mb','ram','ssd','psu','case'];
+const catById=Object.fromEntries(CATS.map(c=>[c.id,c]));
+const P=[],cnt={};
+function A(cat,brand,name,price,o){cnt[cat]=(cnt[cat]||0)+1;P.push(Object.assign({id:cat+cnt[cat],cat,brand,name,price,st:'in'},o));}
+const ALL_S=['AM4','AM5','LGA1700','LGA1851'];
+/* CPU: s сокет, c ядра, t потоки, f частота, w потребление, perf оценка 0-100, ig встроенная графика */
+A('cpu','AMD','Ryzen 5 5500',42000,{s:'AM4',c:6,t:12,f:4.2,w:65,perf:38,ig:0});
+A('cpu','AMD','Ryzen 5 5600',52000,{s:'AM4',c:6,t:12,f:4.4,w:65,perf:44,ig:0});
+A('cpu','AMD','Ryzen 7 5700X3D',105000,{s:'AM4',c:8,t:16,f:4.1,w:105,perf:62,ig:0,hit:1});
+A('cpu','AMD','Ryzen 5 7500F',78000,{s:'AM5',c:6,t:12,f:5.0,w:65,perf:55,ig:0});
+A('cpu','AMD','Ryzen 5 7600',95000,{s:'AM5',c:6,t:12,f:5.1,w:65,perf:58,ig:1});
+A('cpu','AMD','Ryzen 7 7700',140000,{s:'AM5',c:8,t:16,f:5.3,w:65,perf:66,ig:1});
+A('cpu','AMD','Ryzen 7 7800X3D',215000,{s:'AM5',c:8,t:16,f:5.0,w:120,perf:82,ig:1,hit:1});
+A('cpu','AMD','Ryzen 7 9800X3D',280000,{s:'AM5',c:8,t:16,f:5.2,w:120,perf:92,ig:1,hit:1});
+A('cpu','AMD','Ryzen 9 9950X',260000,{s:'AM5',c:16,t:32,f:5.7,w:170,perf:95,ig:1,old:295000});
+A('cpu','Intel','Core i3-12100F',38000,{s:'LGA1700',c:4,t:8,f:4.3,w:60,perf:30,ig:0});
+A('cpu','Intel','Core i5-12400F',55000,{s:'LGA1700',c:6,t:12,f:4.4,w:65,perf:45,ig:0,hit:1});
+A('cpu','Intel','Core i5-13400F',85000,{s:'LGA1700',c:10,t:16,f:4.6,w:65,perf:56,ig:0});
+A('cpu','Intel','Core i5-14600K',150000,{s:'LGA1700',c:14,t:20,f:5.3,w:181,perf:74,ig:1});
+A('cpu','Intel','Core i7-14700K',215000,{s:'LGA1700',c:20,t:28,f:5.6,w:253,perf:84,ig:1,old:239000});
+A('cpu','Intel','Core i9-14900K',290000,{s:'LGA1700',c:24,t:32,f:6.0,w:253,perf:90,ig:1});
+A('cpu','Intel','Core Ultra 5 245K',135000,{s:'LGA1851',c:14,t:14,f:5.2,w:159,perf:70,ig:1});
+A('cpu','Intel','Core Ultra 7 265K',195000,{s:'LGA1851',c:20,t:20,f:5.5,w:250,perf:83,ig:1});
+/* Материнские платы: s сокет, ram тип памяти, ff формат */
+A('mb','ASRock','A520M-HVS',28000,{s:'AM4',ram:'DDR4',ff:'mATX',chip:'A520'});
+A('mb','MSI','B550M PRO-VDH WiFi',48000,{s:'AM4',ram:'DDR4',ff:'mATX',chip:'B550'});
+A('mb','Gigabyte','B550 AORUS Elite V2',68000,{s:'AM4',ram:'DDR4',ff:'ATX',chip:'B550'});
+A('mb','ASRock','A620M-HDV/M.2+',45000,{s:'AM5',ram:'DDR5',ff:'mATX',chip:'A620'});
+A('mb','MSI','PRO B650M-P',62000,{s:'AM5',ram:'DDR5',ff:'mATX',chip:'B650',hit:1});
+A('mb','ASUS','TUF GAMING B650-PLUS WiFi',105000,{s:'AM5',ram:'DDR5',ff:'ATX',chip:'B650'});
+A('mb','Gigabyte','X870 AORUS Elite WiFi7',160000,{s:'AM5',ram:'DDR5',ff:'ATX',chip:'X870'});
+A('mb','ASUS','ROG STRIX B650E-I GAMING WIFI',175000,{s:'AM5',ram:'DDR5',ff:'ITX',chip:'B650E'});
+A('mb','MSI','H610M-E DDR4',33000,{s:'LGA1700',ram:'DDR4',ff:'mATX',chip:'H610'});
+A('mb','Gigabyte','B660M DS3H DDR4',50000,{s:'LGA1700',ram:'DDR4',ff:'mATX',chip:'B660'});
+A('mb','MSI','MAG B760 TOMAHAWK WIFI',95000,{s:'LGA1700',ram:'DDR5',ff:'ATX',chip:'B760'});
+A('mb','ASUS','PRIME Z790-P WIFI',120000,{s:'LGA1700',ram:'DDR5',ff:'ATX',chip:'Z790'});
+A('mb','ASUS','ROG STRIX Z790-I GAMING WIFI',170000,{s:'LGA1700',ram:'DDR5',ff:'ITX',chip:'Z790'});
+A('mb','Gigabyte','B860M AORUS ELITE',100000,{s:'LGA1851',ram:'DDR5',ff:'mATX',chip:'B860'});
+A('mb','MSI','MPG Z890 EDGE TI WIFI',175000,{s:'LGA1851',ram:'DDR5',ff:'ATX',chip:'Z890'});
+/* Память: type, cap ГБ всего, k число планок, mhz */
+A('ram','Kingston','Fury Beast 16 ГБ (2×8)',18000,{type:'DDR4',cap:16,k:2,mhz:3200});
+A('ram','Kingston','Fury Beast 32 ГБ (2×16)',32000,{type:'DDR4',cap:32,k:2,mhz:3200,hit:1});
+A('ram','Corsair','Vengeance LPX 32 ГБ (2×16)',36000,{type:'DDR4',cap:32,k:2,mhz:3600});
+A('ram','Kingston','Fury Beast 16 ГБ (2×8)',28000,{type:'DDR5',cap:16,k:2,mhz:5600});
+A('ram','Kingston','Fury Beast 32 ГБ (2×16)',48000,{type:'DDR5',cap:32,k:2,mhz:5600});
+A('ram','G.Skill','Ripjaws S5 32 ГБ (2×16) CL30',56000,{type:'DDR5',cap:32,k:2,mhz:6000,hit:1});
+A('ram','Corsair','Vengeance RGB 64 ГБ (2×32)',120000,{type:'DDR5',cap:64,k:2,mhz:6000});
+A('ram','Kingston','Fury Renegade 32 ГБ (2×16)',70000,{type:'DDR5',cap:32,k:2,mhz:6400});
+A('ram','Kingston','ValueRAM 8 ГБ (1×8)',9000,{type:'DDR4',cap:8,k:1,mhz:3200});
+/* Видеокарты: w потребление, len длина мм, mem ГБ */
+A('gpu','ASUS','Dual GeForce RTX 3050 6GB',85000,{chip:'NVIDIA',mem:6,w:70,len:229,perf:22});
+A('gpu','Sparkle','Arc B570 10GB',105000,{chip:'Intel',mem:10,w:150,len:272,perf:36});
+A('gpu','ASRock','Arc B580 Challenger 12GB',125000,{chip:'Intel',mem:12,w:190,len:272,perf:42});
+A('gpu','Sapphire','Pulse Radeon RX 7600 8GB',115000,{chip:'AMD',mem:8,w:165,len:240,perf:40});
+A('gpu','MSI','GeForce RTX 5060 VENTUS 2X 8GB',150000,{chip:'NVIDIA',mem:8,w:145,len:245,perf:48,hit:1});
+A('gpu','Gigabyte','GeForce RTX 5060 Ti WINDFORCE 16GB',215000,{chip:'NVIDIA',mem:16,w:180,len:304,perf:58});
+A('gpu','Sapphire','Pulse Radeon RX 9060 XT 16GB',205000,{chip:'AMD',mem:16,w:182,len:298,perf:57});
+A('gpu','Sapphire','Pulse Radeon RX 7800 XT 16GB',260000,{chip:'AMD',mem:16,w:263,len:320,perf:66,old:290000});
+A('gpu','ASUS','Prime GeForce RTX 5070 12GB',295000,{chip:'NVIDIA',mem:12,w:250,len:300,perf:68,hit:1});
+A('gpu','XFX','Swift Radeon RX 9070 XT 16GB',330000,{chip:'AMD',mem:16,w:304,len:320,perf:78});
+A('gpu','Gigabyte','GeForce RTX 5070 Ti WINDFORCE OC 16GB',440000,{chip:'NVIDIA',mem:16,w:300,len:304,perf:82});
+A('gpu','ASUS','TUF GeForce RTX 5080 16GB',590000,{chip:'NVIDIA',mem:16,w:360,len:348,perf:90});
+A('gpu','MSI','GeForce RTX 5090 GAMING TRIO 32GB',1250000,{chip:'NVIDIA',mem:32,w:575,len:359,perf:100,st:'order'});
+/* SSD: cap ГБ, kind */
+A('ssd','Kingston','NV3 500 ГБ',22000,{cap:500,kind:'NVMe',spd:'до 6000 МБ/с'});
+A('ssd','Kingston','NV3 1 ТБ',36000,{cap:1000,kind:'NVMe',spd:'до 6000 МБ/с',hit:1});
+A('ssd','WD','Blue SN580 1 ТБ',40000,{cap:1000,kind:'NVMe',spd:'до 4150 МБ/с'});
+A('ssd','Samsung','990 EVO 1 ТБ',52000,{cap:1000,kind:'NVMe',spd:'до 5000 МБ/с'});
+A('ssd','Samsung','990 PRO 2 ТБ',140000,{cap:2000,kind:'NVMe',spd:'до 7450 МБ/с'});
+A('ssd','Crucial','P3 Plus 2 ТБ',78000,{cap:2000,kind:'NVMe',spd:'до 5000 МБ/с'});
+A('ssd','Samsung','870 EVO 1 ТБ SATA',55000,{cap:1000,kind:'SATA',spd:'до 560 МБ/с'});
+A('ssd','Kingston','A400 480 ГБ SATA',17000,{cap:480,kind:'SATA',spd:'до 500 МБ/с'});
+A('ssd','WD','Black SN850X 2 ТБ',125000,{cap:2000,kind:'NVMe',spd:'до 7300 МБ/с'});
+A('ssd','Samsung','9100 PRO 1 ТБ PCIe 5.0',120000,{cap:1000,kind:'NVMe',spd:'до 14700 МБ/с'});
+/* HDD: cap ТБ */
+A('hdd','Seagate','BarraCuda 1 ТБ 7200',25000,{cap:1,rpm:7200});
+A('hdd','WD','Blue 2 ТБ 5400',38000,{cap:2,rpm:5400});
+A('hdd','Seagate','BarraCuda 4 ТБ 5400',62000,{cap:4,rpm:5400});
+A('hdd','Toshiba','P300 6 ТБ 7200',85000,{cap:6,rpm:7200});
+/* Кулеры: kind air/aio, tdp, h высота мм (воздух), rad радиатор мм (СЖО) */
+A('cooler','DeepCool','AG200',7000,{kind:'air',tdp:100,h:125,sockets:ALL_S});
+A('cooler','Thermalright','Assassin X 120 SE',9000,{kind:'air',tdp:180,h:148,sockets:ALL_S});
+A('cooler','DeepCool','AK400',15000,{kind:'air',tdp:220,h:155,sockets:ALL_S,hit:1});
+A('cooler','Thermalright','Peerless Assassin 120 SE',17000,{kind:'air',tdp:245,h:155,sockets:ALL_S,hit:1});
+A('cooler','DeepCool','AK620',28000,{kind:'air',tdp:260,h:160,sockets:ALL_S});
+A('cooler','Noctua','NH-D15 G2',55000,{kind:'air',tdp:300,h:168,sockets:ALL_S});
+A('cooler','Arctic','Liquid Freezer III 280',55000,{kind:'aio',tdp:300,rad:280,sockets:ALL_S});
+A('cooler','DeepCool','LE360 ARGB 360 мм',48000,{kind:'aio',tdp:330,rad:360,sockets:ALL_S});
+A('cooler','DeepCool','LE240 240 мм',32000,{kind:'aio',tdp:250,rad:240,sockets:ALL_S});
+/* БП: w, eff, mod, ff */
+A('psu','DeepCool','PF450 450 Вт',17000,{w:450,eff:'White',mod:0,ff:'ATX'});
+A('psu','Cougar','VTE 500 Вт',19000,{w:500,eff:'Bronze',mod:0,ff:'ATX'});
+A('psu','DeepCool','PK550D 550 Вт',24000,{w:550,eff:'Bronze',mod:0,ff:'ATX'});
+A('psu','be quiet!','System Power 10 650 Вт',32000,{w:650,eff:'Bronze',mod:0,ff:'ATX'});
+A('psu','Corsair','CX650 650 Вт',36000,{w:650,eff:'Bronze',mod:0,ff:'ATX'});
+A('psu','MSI','MAG A750GL 750 Вт',52000,{w:750,eff:'Gold',mod:1,ff:'ATX',hit:1});
+A('psu','Corsair','RM850e 850 Вт',72000,{w:850,eff:'Gold',mod:1,ff:'ATX'});
+A('psu','Seasonic','FOCUS GX-1000 1000 Вт',105000,{w:1000,eff:'Gold',mod:1,ff:'ATX'});
+A('psu','ASUS','ROG THOR II 1200 Вт',190000,{w:1200,eff:'Platinum',mod:1,ff:'ATX'});
+A('psu','Cooler Master','V650 SFX 650 Вт',58000,{w:650,eff:'Gold',mod:1,ff:'SFX'});
+A('psu','Corsair','SF750 750 Вт',105000,{w:750,eff:'Platinum',mod:1,ff:'SFX'});
+/* Корпуса: ff поддерживаемые платы, maxGpu, maxCool, rad макс. радиатор, psu форматы БП */
+A('case','Zalman','T8',18000,{ff:['ATX','mATX','ITX'],maxGpu:330,maxCool:160,rad:240,psu:['ATX','SFX']});
+A('case','DeepCool','MATREXX 40 (mATX)',20000,{ff:['mATX','ITX'],maxGpu:330,maxCool:168,rad:240,psu:['ATX','SFX']});
+A('case','Cougar','MX330-G',28000,{ff:['ATX','mATX','ITX'],maxGpu:340,maxCool:160,rad:240,psu:['ATX','SFX']});
+A('case','DeepCool','CH360',42000,{ff:['mATX','ITX'],maxGpu:320,maxCool:160,rad:280,psu:['ATX','SFX']});
+A('case','NZXT','H5 Flow',52000,{ff:['ATX','mATX','ITX'],maxGpu:365,maxCool:165,rad:280,psu:['ATX','SFX']});
+A('case','Corsair','4000D Airflow',58000,{ff:['ATX','mATX','ITX'],maxGpu:360,maxCool:170,rad:360,psu:['ATX','SFX'],hit:1});
+A('case','Lian Li','LANCOOL 216',62000,{ff:['ATX','mATX','ITX'],maxGpu:392,maxCool:180,rad:360,psu:['ATX','SFX']});
+A('case','Cooler Master','NR200P (ITX)',62000,{ff:['ITX'],maxGpu:330,maxCool:155,rad:280,psu:['SFX']});
+A('case','Fractal Design','North',85000,{ff:['ATX','mATX','ITX'],maxGpu:355,maxCool:170,rad:360,psu:['ATX','SFX']});
+A('case','Fractal Design','Torrent',110000,{ff:['ATX','mATX','ITX'],maxGpu:423,maxCool:188,rad:360,psu:['ATX','SFX']});
+const byId=Object.fromEntries(P.map(p=>[p.id,p]));
+
+const PRESETS=[
+ {id:'office',n:'Офис и учёба',d:'Тихий компактный ПК без видеокарты: документы, интернет, видео, лёгкие игры.',tags:['Офис','Без видеокарты'],b:{cpu:'cpu5',mb:'mb4',ram:'ram4',ssd:'ssd1',cooler:'cooler1',psu:'psu2',case:'case2'}},
+ {id:'am4x3d',n:'Игровой AM4 на X3D',d:'Недорогая платформа с отличной игровой производительностью для Full HD.',tags:['Full HD','AMD'],b:{cpu:'cpu3',mb:'mb3',ram:'ram3',gpu:'gpu5',ssd:'ssd3',cooler:'cooler3',psu:'psu5',case:'case3'}},
+ {id:'fhd-amd',n:'Full HD бюджет (AMD)',d:'Первый игровой ПК: современные игры в Full HD на высоких настройках.',tags:['Full HD','AMD'],b:{cpu:'cpu2',mb:'mb2',ram:'ram2',gpu:'gpu4',ssd:'ssd2',cooler:'cooler2',psu:'psu4',case:'case3'}},
+ {id:'fhd-intel',n:'Full HD бюджет (Intel)',d:'Intel и Arc B580: много видеопамяти за небольшие деньги.',tags:['Full HD','Intel'],b:{cpu:'cpu11',mb:'mb10',ram:'ram2',gpu:'gpu3',ssd:'ssd3',cooler:'cooler2',psu:'psu4',case:'case1'}},
+ {id:'qhd',n:'Игры в 1440p',d:'Золотая середина: Ryzen 7 и RTX 5070, запас на несколько лет.',tags:['1440p','AMD','Хит'],b:{cpu:'cpu6',mb:'mb6',ram:'ram6',gpu:'gpu9',ssd:'ssd4',cooler:'cooler4',psu:'psu6',case:'case6'}},
+ {id:'itx',n:'Компактный ITX',d:'Мощный ПК размером с небольшую коробку. Подходит для стола и телевизора.',tags:['1440p','ITX','Малый размер'],b:{cpu:'cpu7',mb:'mb8',ram:'ram6',gpu:'gpu6',ssd:'ssd4',cooler:'cooler4',psu:'psu10',case:'case8'}},
+ {id:'intel-top',n:'Топ на Intel',d:'Core i7 и RTX 5070 Ti, жидкостное охлаждение, быстрый SSD.',tags:['1440p / 4K','Intel'],b:{cpu:'cpu14',mb:'mb12',ram:'ram6',gpu:'gpu11',ssd:'ssd5',cooler:'cooler8',psu:'psu8',case:'case6'}},
+ {id:'4k',n:'4K и стриминг',d:'Лучший игровой процессор и RTX 5080: 4K, стрим и запись без компромиссов.',tags:['4K','AMD'],b:{cpu:'cpu8',mb:'mb7',ram:'ram6',gpu:'gpu12',ssd:'ssd5',cooler:'cooler7',psu:'psu7',case:'case7'}},
+ {id:'work',n:'Монтаж и 3D',d:'16 ядер, 64 ГБ памяти и быстрый SSD с HDD для архива. Видео, 3D, рендер.',tags:['Работа','Рендер'],b:{cpu:'cpu9',mb:'mb7',ram:'ram7',gpu:'gpu11',ssd:'ssd9',hdd:'hdd3',cooler:'cooler6',psu:'psu8',case:'case10'}}
+];
+
+const SEED=[
+ {id:'u1',cat:'gpu',title:'GeForce RTX 3060 Ti 8GB MSI Ventus 2X',price:105000,cond:'Хорошее',age:'2 года',war:'Нет',city:'Алматы',seller:'Данияр',phone:'+7 701 555 01 23',desc:'Не майнила. В играх до 68°. Есть коробка и чек, видеокарту можно проверить при встрече.',d:1},
+ {id:'u2',cat:'cpu',title:'Ryzen 5 3600 с кулером Wraith Stealth',price:24000,cond:'Хорошее',age:'4 года',war:'Нет',city:'Астана',seller:'Айжан',phone:'+7 702 555 02 34',desc:'Работал в офисном ПК, без разгона. Кулер в комплекте.',d:2},
+ {id:'u3',cat:'mb',title:'ASUS TUF B450-PLUS GAMING (AM4)',price:22000,cond:'Рабочее',age:'5 лет',war:'Нет',city:'Караганда',seller:'Руслан',phone:'+7 705 555 03 45',desc:'Все слоты рабочие, есть заглушка и SATA-кабели. BIOS обновлён под Ryzen 5000.',d:3},
+ {id:'u4',cat:'ram',title:'Crucial Ballistix 2×8 ГБ DDR4 3200',price:14000,cond:'Как новый',age:'1 год',war:'1 месяц',city:'Алматы',seller:'Тимур',phone:'+7 707 555 04 56',desc:'Работает на 3200 без проблем. Memtest пройден.',d:4},
+ {id:'u5',cat:'ssd',title:'Samsung 970 EVO Plus 500 ГБ NVMe',price:17000,cond:'Хорошее',age:'3 года',war:'Нет',city:'Шымкент',seller:'Нурлан',phone:'+7 708 555 05 67',desc:'Износ по SMART около 8%. Скриншот CrystalDiskInfo пришлю.',d:5},
+ {id:'u6',cat:'case',title:'NZXT H510 белый',price:21000,cond:'Хорошее',age:'3 года',war:'Нет',city:'Алматы',seller:'Аружан',phone:'+7 700 555 06 78',desc:'Закалённое стекло без сколов, 2 вентилятора. Пыль почищена.',d:6},
+ {id:'u7',cat:'psu',title:'Corsair RM750x 750 Вт 80+ Gold',price:38000,cond:'Хорошее',age:'4 года',war:'Нет',city:'Астана',seller:'Ержан',phone:'+7 701 555 07 89',desc:'Полностью модульный, все кабели в комплекте. Работал в игровом ПК.',d:7},
+ {id:'u8',cat:'gpu',title:'Radeon RX 580 8GB Sapphire Nitro+',price:28000,cond:'Рабочее',age:'6 лет',war:'Нет',city:'Актобе',seller:'Бауыржан',phone:'+7 702 555 08 90',desc:'Менял термопасту. Подходит для лёгких игр и офиса.',d:9},
+ {id:'u9',cat:'hdd',title:'WD Blue 1 ТБ 7200',price:9000,cond:'Рабочее',age:'5 лет',war:'Нет',city:'Алматы',seller:'Сергей',phone:'+7 705 555 09 01',desc:'Bad-секторов нет, наработка около 11 000 часов.',d:10},
+ {id:'u10',cat:'cpu',title:'Intel Core i7-9700K',price:45000,cond:'Хорошее',age:'5 лет',war:'Нет',city:'Алматы',seller:'Марат',phone:'+7 707 555 10 12',desc:'Без разгона, температура в норме. Без кулера.',d:12},
+ {id:'u11',cat:'cooler',title:'Noctua NH-U12S',price:22000,cond:'Как новый',age:'1 год',war:'1 месяц',city:'Астана',seller:'Динара',phone:'+7 708 555 11 23',desc:'Все крепления для AM4/AM5/LGA1700 и вентилятор в комплекте.',d:14},
+ {id:'u12',cat:'gpu',title:'GeForce GTX 1660 Super 6GB',price:40000,cond:'Хорошее',age:'4 года',war:'Нет',city:'Павлодар',seller:'Виктор',phone:'+7 700 555 12 34',desc:'Тихая, до 60° в играх. Две видеовыхода DP и HDMI рабочие.',d:16},
+ {id:'u13',cat:'ram',title:'Kingston Fury Beast 2×16 ГБ DDR5 5600',price:40000,cond:'Как новый',age:'6 месяцев',war:'3 месяца',city:'Алматы',seller:'Камила',phone:'+7 701 555 13 45',desc:'Менял на более быструю. Профиль XMP работает.',d:18},
+ {id:'u14',cat:'mb',title:'MSI MAG B650 TOMAHAWK WiFi',price:80000,cond:'Как новый',age:'8 месяцев',war:'3 месяца',city:'Шымкент',seller:'Азамат',phone:'+7 702 555 14 56',desc:'Есть коробка и все аксессуары. BIOS последней версии.',d:20}
+];
+const CITIES=['Алматы','Астана','Шымкент','Караганда','Актобе','Павлодар','Атырау','Костанай','Усть-Каменогорск','Семей','Другой город'];
+const CONDS=[['Как новый',0.85],['Хорошее',0.7],['Рабочее',0.5],['Нужен ремонт',0.25]];
+const SVC=[
+ {id:'assembly',n:'Сборка и настройка',d:'Соберём, уложим кабели, обновим BIOS',p:15000,min:3},
+ {id:'windows',n:'Windows и драйверы',d:'Установка системы и всех драйверов',p:5000,min:1},
+ {id:'stress',n:'Тест 24 часа',d:'Нагрузочный тест и отчёт по температурам',p:4000,min:3}
+];
+const DEL=[{id:'pickup',n:'Самовывоз',p:0},{id:'courier',n:'Курьер по городу',p:2500},{id:'kz',n:'Доставка по Казахстану',p:6000}];
+const PAY=['Kaspi','Наличные при получении','Банковская карта'];
+const PROMOS={PCMARKET5:0.05,NEWBUILD:0.03};
+
+/* ============================ LOGIC ============================ */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('ru-RU').replace(/ /g,' ')+' ₸';
+const capL=g=>g>=1000?(g/1000)+' ТБ':g+' ГБ';
+const nm=p=>p.brand+' '+p.name;
+function specLine(p){
+ switch(p.cat){
+  case'cpu':return p.s+' · '+p.c+'/'+p.t+' · до '+p.f+' ГГц · '+p.w+' Вт';
+  case'mb':return p.s+' · '+p.ram+' · '+p.ff+' · '+p.chip;
+  case'ram':return p.type+'-'+p.mhz+' · '+p.cap+' ГБ · '+p.k+' '+(p.k>1?'планки':'планка');
+  case'gpu':return p.mem+' ГБ · '+p.w+' Вт · '+p.len+' мм';
+  case'ssd':return capL(p.cap)+' · '+p.kind+' · '+p.spd;
+  case'hdd':return p.cap+' ТБ · '+p.rpm+' об/мин';
+  case'cooler':return (p.kind==='aio'?'СЖО '+p.rad+' мм':'Воздушный, '+p.h+' мм')+' · до '+p.tdp+' Вт';
+  case'psu':return p.w+' Вт · 80+ '+p.eff+' · '+(p.mod?'модульный':'без модулей')+' · '+p.ff;
+  case'case':return p.ff.join('/')+' · видеокарта до '+p.maxGpu+' мм';
+ }
+ return '';
+}
+function specRows(p){
+ const r=[['Категория',catById[p.cat].s],['Бренд',p.brand]];
+ switch(p.cat){
+  case'cpu':r.push(['Сокет',p.s],['Ядра / потоки',p.c+' / '+p.t],['Макс. частота',p.f+' ГГц'],['Потребление',p.w+' Вт'],['Встроенная графика',p.ig?'Есть':'Нет']);break;
+  case'mb':r.push(['Сокет',p.s],['Чипсет',p.chip],['Память',p.ram],['Формат',p.ff]);break;
+  case'ram':r.push(['Тип',p.type],['Объём',p.cap+' ГБ'],['Планок в комплекте',p.k],['Частота',p.mhz+' МГц']);break;
+  case'gpu':r.push(['Чип',p.chip],['Видеопамять',p.mem+' ГБ'],['Потребление',p.w+' Вт'],['Длина',p.len+' мм']);break;
+  case'ssd':r.push(['Объём',capL(p.cap)],['Тип',p.kind],['Скорость чтения',p.spd]);break;
+  case'hdd':r.push(['Объём',p.cap+' ТБ'],['Скорость',p.rpm+' об/мин']);break;
+  case'cooler':r.push(['Тип',p.kind==='aio'?'Жидкостное (СЖО)':'Воздушный'],['Отвод тепла','до '+p.tdp+' Вт'],p.kind==='aio'?['Радиатор',p.rad+' мм']:['Высота',p.h+' мм'],['Сокеты',p.sockets.join(', ')]);break;
+  case'psu':r.push(['Мощность',p.w+' Вт'],['Сертификат','80+ '+p.eff],['Кабели',p.mod?'Модульные':'Несъёмные'],['Формат',p.ff]);break;
+  case'case':r.push(['Платы',p.ff.join(', ')],['Видеокарта до',p.maxGpu+' мм'],['Кулер до',p.maxCool+' мм'],['Радиатор СЖО до',p.rad+' мм'],['Формат БП',p.psu.join(', ')]);break;
+ }
+ return r;
+}
+const objs=b=>{const o={};for(const k in b){if(byId[b[k]])o[k]=byId[b[k]]}return o};
+const total=o=>Object.values(o).reduce((a,p)=>a+p.price,0);
+const draw=o=>(o.cpu?o.cpu.w:0)+(o.gpu?o.gpu.w:0)+((o.cpu||o.gpu)?75:0);
+const recW=o=>Math.ceil(draw(o)*1.5/50)*50;
+function checks(o){
+ const L=[];const add=(lvl,t,slots)=>L.push({lvl,t,slots:slots||[]});
+ if(o.cpu&&o.mb){o.cpu.s===o.mb.s?add('ok','Сокет '+o.cpu.s+': процессор и плата подходят друг другу',['cpu','mb']):add('err','Процессор на сокет '+o.cpu.s+', а плата на '+o.mb.s,['cpu','mb']);}
+ if(o.mb&&o.ram){o.ram.type===o.mb.ram?add('ok','Память '+o.ram.type+' подходит к плате',['ram','mb']):add('err','Плата работает с '+o.mb.ram+', а выбрана память '+o.ram.type,['ram','mb']);}
+ if(o.mb&&o.case){o.case.ff.includes(o.mb.ff)?add('ok','Плата '+o.mb.ff+' помещается в корпус',['mb','case']):add('err','Плата '+o.mb.ff+' не помещается в корпус (он на '+o.case.ff.join(', ')+')',['mb','case']);}
+ if(o.gpu&&o.case){o.gpu.len<=o.case.maxGpu?add('ok','Видеокарта '+o.gpu.len+' мм, корпус принимает до '+o.case.maxGpu+' мм',['gpu','case']):add('err','Видеокарта '+o.gpu.len+' мм длиннее, чем помещается в корпус ('+o.case.maxGpu+' мм)',['gpu','case']);}
+ if(o.cooler&&o.cpu){
+  o.cooler.sockets.includes(o.cpu.s)?add('ok','Кулер крепится на сокет '+o.cpu.s,['cooler','cpu']):add('err','Кулер не подходит к сокету '+o.cpu.s,['cooler','cpu']);
+  if(o.cooler.tdp<o.cpu.w)add('warn','Кулер рассчитан на '+o.cooler.tdp+' Вт, а процессору нужно около '+o.cpu.w+' Вт: будет шумно или упрётся в нагрев',['cooler','cpu']);
+ }
+ if(o.cooler&&o.case){
+  if(o.cooler.kind==='air'){o.cooler.h<=o.case.maxCool?add('ok','Кулер '+o.cooler.h+' мм помещается (лимит корпуса '+o.case.maxCool+' мм)',['cooler','case']):add('err','Кулер высотой '+o.cooler.h+' мм не влезет в корпус (лимит '+o.case.maxCool+' мм)',['cooler','case']);}
+  else{o.cooler.rad<=o.case.rad?add('ok','Радиатор '+o.cooler.rad+' мм поддерживается корпусом',['cooler','case']):add('err','Корпус не принимает радиатор '+o.cooler.rad+' мм (максимум '+o.case.rad+' мм)',['cooler','case']);}
+ }
+ if(o.psu&&o.case){o.case.psu.includes(o.psu.ff)?0:add('err','Блок питания формата '+o.psu.ff+' не подходит к этому корпусу',['psu','case']);}
+ if(o.psu&&draw(o)>0){
+  const d=draw(o),r=recW(o);
+  if(o.psu.w>=r)add('ok','Блок питания '+o.psu.w+' Вт: запас достаточный (нагрузка до '+d+' Вт)',['psu']);
+  else if(o.psu.w>=d)add('warn','Блока питания '+o.psu.w+' Вт хватит впритык, лучше от '+r+' Вт',['psu']);
+  else add('err','Блок питания '+o.psu.w+' Вт слабый: нагрузка до '+d+' Вт, берите от '+r+' Вт',['psu']);
+ }
+ if(o.cpu&&!o.gpu){o.cpu.ig?add('info','Видеокарты нет: графику даёт процессор, этого хватит для офиса и видео',['gpu']):add('warn','У процессора нет встроенной графики, нужна видеокарта',['gpu','cpu']);}
+ if(o.ram&&o.ram.k===1)add('warn','Одна планка памяти: работает медленнее, лучше две',['ram']);
+ if(o.hdd&&!o.ssd)add('warn','Только HDD: система будет загружаться медленно, добавьте SSD',['ssd']);
+ if(o.cpu&&o.gpu){
+  if(o.gpu.perf-o.cpu.perf>35)add('warn','Процессор слабоват для такой видеокарты: в играх она не раскроется',['cpu','gpu']);
+  else if(o.cpu.perf-o.gpu.perf>45)add('info','Видеокарта заметно слабее процессора: для игр выгоднее вложиться в неё',['gpu']);
+ }
+ const miss=REQ.filter(k=>!o[k]);
+ if(miss.length&&miss.length<REQ.length)add('todo','Не выбрано: '+miss.map(k=>catById[k].s.toLowerCase()).join(', '),miss);
+ return L;
+}
+const errs=o=>checks(o).filter(c=>c.lvl==='err').map(c=>c.t);
+function okWith(cat,p,b){
+ const cur=new Set(errs(objs(b)));const nb=Object.assign({},b);nb[cat]=p.id;
+ return errs(objs(nb)).filter(t=>!cur.has(t));
+}
+function tier(g,has){
+ if(!has)return g?'Офис, видео и лёгкие игры':'Нужна видеокарта';
+ if(g>=85)return'4K на ультра';if(g>=70)return'4K / 1440p высокие';if(g>=55)return'1440p высокие';
+ if(g>=38)return'Full HD высокие';if(g>=20)return'Full HD средние';return'Лёгкие игры';
+}
+function scores(o){
+ const g=o.gpu?o.gpu.perf:(o.cpu&&o.cpu.ig?8:0),c=o.cpu?o.cpu.perf:0;
+ const ramc=o.ram?Math.min(100,o.ram.cap/64*100):0;
+ return{game:o.cpu?Math.round(g*.7+c*.3):0,work:o.cpu?Math.round(c*.6+ramc*.15+(o.gpu?o.gpu.perf*.25:0)):0,tier:tier(g,!!o.gpu)};
+}
+function status(o){
+ const ch=checks(o),e=ch.filter(c=>c.lvl==='err').length,w=ch.filter(c=>c.lvl==='warn').length,m=REQ.filter(k=>!o[k]).length;
+ if(!Object.keys(o).length)return{k:'todo',t:'Пока пусто'};
+ if(e)return{k:'err',t:'Конфликтов: '+e};
+ if(m)return{k:'todo',t:'Не выбрано: '+m};
+ if(w)return{k:'warn',t:'Замечаний: '+w};
+ return{k:'ok',t:'Всё совместимо'};
+}
+
+/* Автоподбор по бюджету */
+function autoBuild(budget,purpose,plat,compact){
+ const share={
+  game:{cpu:.2,mb:.1,ram:.07,gpu:.38,ssd:.07,psu:.07,case:.06,cooler:.05},
+  work:{cpu:.3,mb:.12,ram:.12,gpu:.2,ssd:.09,psu:.06,case:.06,cooler:.05},
+  office:{cpu:.28,mb:.14,ram:.12,gpu:0,ssd:.12,psu:.08,case:.12,cooler:.04}
+ }[purpose];
+ const isITXcase=p=>p.ff.length===1&&p.ff[0]==='ITX';
+ const pool=cat=>P.filter(p=>p.cat===cat).filter(p=>{
+  if(cat==='cpu'){if(plat==='amd'&&!p.s.startsWith('AM'))return false;if(plat==='intel'&&!p.s.startsWith('LGA'))return false;if(purpose==='office'&&!p.ig)return false;}
+  if(cat==='mb'){if(plat==='amd'&&!p.s.startsWith('AM'))return false;if(plat==='intel'&&!p.s.startsWith('LGA'))return false;return compact?p.ff==='ITX':p.ff!=='ITX';}
+  if(cat==='case')return compact?isITXcase(p):!isITXcase(p);
+  if(cat==='psu')return compact?p.ff==='SFX':p.ff==='ATX';
+  if(cat==='ram')return p.k>=2;
+  if(cat==='ssd')return p.kind==='NVMe'&&p.cap>=500;
+  return true;
+ }).sort((a,b)=>a.price-b.price);
+ let b={};
+ const fits=(cat,p)=>okWith(cat,p,b).length===0;
+ const pick=(cat,sh)=>{
+  const l=pool(cat).filter(p=>fits(cat,p));if(!l.length)return;
+  const within=l.filter(p=>p.price<=sh);b[cat]=(within.length?within[within.length-1]:l[0]).id;
+ };
+ const fixPsu=()=>{
+  const o=objs(b);delete b.psu;const r=recW(o);
+  const l=pool('psu').filter(p=>fits('psu',p)&&p.w>=r);
+  if(l.length)b.psu=l[0].id;else{const l2=pool('psu').filter(p=>fits('psu',p));if(l2.length)b.psu=l2[l2.length-1].id;}
+ };
+ pick('cpu',budget*share.cpu);pick('mb',budget*share.mb);pick('ram',budget*share.ram);
+ if(share.gpu)pick('gpu',budget*share.gpu);
+ pick('ssd',budget*share.ssd);fixPsu();
+ /* корпус и кулер подбираем так, чтобы всё влезло */
+ pick('case',budget*share.case);
+ const cpu=byId[b.cpu];
+ {const l=pool('cooler').filter(p=>fits('cooler',p));const good=l.filter(p=>!cpu||p.tdp>=cpu.w);const base=good.length?good:l;
+  if(base.length){const within=base.filter(p=>p.price<=budget*share.cooler);b.cooler=(within.length?within[within.length-1]:base[0]).id;}}
+ const tot=()=>total(objs(b));
+ /* если дорого: понижаем самое дорогое */
+ for(let i=0;i<24&&tot()>budget;i++){
+  const order=['gpu','cpu','mb','ram','ssd','case','cooler'].filter(k=>b[k]).sort((x,y)=>byId[b[y]].price-byId[b[x]].price);
+  let done=false;
+  for(const k of order){
+   const cur=byId[b[k]],l=pool(k).filter(p=>p.price<cur.price&&fits(k,p));
+   if(l.length){const prev=Object.assign({},b);b[k]=l[l.length-1].id;fixPsu();if(tot()<total(objs(prev))){done=true;break}b=prev;}
+  }
+  if(!done)break;
+ }
+ /* если остались деньги: улучшаем */
+ const up=purpose==='office'?['cpu','ram','ssd','cooler','case','mb']:['gpu','cpu','ram','ssd','cooler','case','mb'];
+ for(let i=0;i<30;i++){
+  let done=false;
+  for(const k of up){
+   if(!b[k])continue;const cur=byId[b[k]];
+   const l=pool(k).filter(p=>p.price>cur.price&&fits(k,p));
+   for(const p of l){
+    const prev=Object.assign({},b);b[k]=p.id;fixPsu();
+    if(b.psu&&tot()<=budget){done=true;break}
+    b=prev;
+   }
+   if(done)break;
+  }
+  if(!done)break;
+ }
+ return b;
+}
+
+/* ============================ STATE ============================ */
+const KEY='pcmarket.v1';
+const DEF={cart:{},svc:{},fav:[],favUsed:[],build:{},builds:[],listings:[],orders:[],theme:'auto',wa:'',me:{name:'',phone:'',city:'Алматы'},del:'pickup',pay:PAY[0],promo:'',tab:'catalog'};
+function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');return Object.assign(JSON.parse(JSON.stringify(DEF)),r||{})}catch(e){return JSON.parse(JSON.stringify(DEF))}}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const cartCount=()=>Object.values(S.cart).reduce((a,b)=>a+b,0);
+const cartParts=()=>Object.entries(S.cart).filter(([id])=>byId[id]).reduce((a,[id,q])=>a+byId[id].price*q,0);
+const cartItems=()=>Object.entries(S.cart).filter(([id])=>byId[id]).map(([id,q])=>({p:byId[id],q}));
+const digits=s=>String(s||'').replace(/\D/g,'');
+const ago=ts=>{const d=Math.floor((Date.now()-ts)/864e5);if(d<=0)return'сегодня';if(d===1)return'вчера';if(d<5)return d+' дня назад';if(d<30)return d+' дн. назад';return Math.floor(d/30)+' мес. назад'};
+const allUsed=()=>{const now=Date.now();return S.listings.map(x=>Object.assign({own:1},x)).concat(SEED.map(x=>Object.assign({},x,{ts:now-x.d*864e5,demo:1})))};
+
+/* ============================ UI HELPERS ============================ */
+/*__DOM__*/
+const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const IC={
+ cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>',
+ mb:'<rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="5" height="5"/><path d="M15 7h3M15 11h3M7 16h10"/>',
+ gpu:'<rect x="2" y="7" width="20" height="9" rx="1.5"/><circle cx="8" cy="11.5" r="2.5"/><circle cx="15.5" cy="11.5" r="2.5"/><path d="M5 16v2.5M2 19h6"/>',
+ ram:'<rect x="2" y="7" width="20" height="9" rx="1"/><path d="M6 16v2M10 16v2M14 16v2M18 16v2M6 11h2M11 11h2M16 11h2"/>',
+ ssd:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2"/><circle cx="17" cy="12" r="1"/>',
+ hdd:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="11" r="4"/><circle cx="12" cy="11" r=".8"/><path d="M8 17h8"/>',
+ psu:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="3.5"/><path d="M16.5 8.5l-1.5 3.5h3l-1.5 3.5"/>',
+ case:'<rect x="6" y="2.5" width="12" height="19" rx="2"/><circle cx="12" cy="14" r="3"/><path d="M9 6h6"/>',
+ cooler:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.6"/><path d="M12 10.4C12 6 10 5 9 5.5M13.6 12C18 12 19 10 18.5 9M12 13.6C12 18 14 19 15 18.5M10.4 12C6 12 5 14 5.5 15"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+ heart:'<path d="M12 20s-7-4.4-9-9.2C1.8 7.6 3.700 5 6.500 5c1.800 0 3.200 1 5.500 3.200C14.300 6 15.700 5 17.500 5 20.300 5 22.200 7.600 21 10.800 19 15.600 12 20 12 20z"/>',
+ cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.700 12.500a1 1 0 001 .8h8.900a1 1 0 001-.8L20 8H6"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.900 4.900l1.400 1.400M17.700 17.700l1.400 1.400M2 12h2M20 12h2M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/>',
+ moon:'<path d="M20 14.500A8 8 0 019.500 4 8 8 0 1020 14.500z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ check:'<path d="M5 12.500l4.500 4.500L19 7"/>',
+ alert:'<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.1"/>',
+ info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/>',
+ dot:'<circle cx="12" cy="12" r="3"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+ share:'<circle cx="6" cy="12" r="2.500"/><circle cx="18" cy="6" r="2.500"/><circle cx="18" cy="18" r="2.500"/><path d="M8.200 10.800l7.600-3.600M8.200 13.200l7.600 3.600"/>',
+ phone:'<path d="M5 4h4l2 5-2.500 1.500a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/>',
+ grid:'<rect x="3" y="3" width="7" height="7" rx="1.500"/><rect x="14" y="3" width="7" height="7" rx="1.500"/><rect x="3" y="14" width="7" height="7" rx="1.500"/><rect x="14" y="14" width="7" height="7" rx="1.500"/>',
+ wrench:'<path d="M14.500 6.500a4 4 0 005 5L21 13l-8 8-3-3 8-8M3 21l5-5"/><path d="M3 11l8-8 3 3"/>',
+ bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>',
+ tag:'<path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.500" cy="8.500" r="1.200"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>',
+ save:'<path d="M5 3h11l3 3v15H5V3z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
+ filter:'<path d="M3 5h18M6 12h12M10 19h4"/>',
+ download:'<path d="M12 3v12M7 11l5 5 5-5M4 20h16"/>'
+};
+const ic=(n,s)=>'<svg width="'+(s||22)+'" height="'+(s||22)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[n]+'</svg>';
+const tile=(cat,w,h,sz)=>'<div class="tile t-'+cat+'" style="width:'+w+';height:'+h+'">'+ic(cat,sz||26)+'</div>';
+
+/* ============================ ROUTING & SHEETS ============================ */
+let T=S.tab||'catalog',sheetOpen=false,sheetFn=null,sheetPushed=false,ignorePop=false;
+const TABS=[['catalog','Каталог','grid'],['build','Сборка','wrench'],['presets','Готовые','bolt'],['used','Б/у','tag'],['profile','Профиль','user']];
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
+function setTab(t,push){
+ const wasSheet=sheetOpen&&sheetPushed;
+ if(sheetOpen){hideSheet();sheetPushed=false}
+ if(t===T&&push!==false){window.scrollTo(0,0);render();return}
+ T=t;if(t!=='cart'){S.tab=t;save()}
+ if(push!==false){try{wasSheet?history.replaceState({t},''):history.pushState({t},'')}catch(e){}}
+ window.scrollTo(0,0);render();
+}
+function openSheet(fn){
+ sheetFn=fn;$('#sheetBody').innerHTML=fn();
+ if(!sheetOpen){sheetOpen=true;$('#sheet').hidden=false;document.body.classList.add('lock');try{history.pushState({sh:1},'');sheetPushed=true}catch(e){sheetPushed=false}}
+ $('.panel').scrollTop=0;
+}
+function refreshSheet(){if(!sheetOpen||!sheetFn)return;const p=$('.panel'),y=p.scrollTop;$('#sheetBody').innerHTML=sheetFn();p.scrollTop=y}
+function hideSheet(){sheetOpen=false;sheetFn=null;$('#sheet').hidden=true;document.body.classList.remove('lock')}
+function closeSheet(){
+ if(!sheetOpen)return;hideSheet();
+ if(sheetPushed){sheetPushed=false;ignorePop=true;try{history.back()}catch(e){ignorePop=false}}
+}
+window.addEventListener('popstate',e=>{
+ if(ignorePop){ignorePop=false;return}
+ if(sheetOpen){hideSheet();sheetPushed=false;return}
+ const t=e.state&&e.state.t;if(t){T=t;render()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+
+/* ============================ VIEWS ============================ */
+const C={cat:'all',q:'',sort:'pop',brands:[],max:0,stock:false,compat:false,filters:false};
+function catList(){
+ let l=P.filter(p=>(C.cat==='all'||p.cat===C.cat));
+ if(C.q){const q=C.q.toLowerCase().trim();l=l.filter(p=>(p.brand+' '+p.name+' '+specLine(p)).toLowerCase().includes(q))}
+ if(C.cat!=='all'){
+  if(C.brands.length)l=l.filter(p=>C.brands.includes(p.brand));
+  if(C.max)l=l.filter(p=>p.price<=C.max);
+  if(C.compat)l=l.filter(p=>okWith(p.cat,p,S.build).length===0);
+ }
+ if(C.stock)l=l.filter(p=>p.st==='in');
+ const s=C.sort;
+ if(s==='p1')l=l.slice().sort((a,b)=>a.price-b.price);
+ else if(s==='p2')l=l.slice().sort((a,b)=>b.price-a.price);
+ else if(s==='perf')l=l.slice().sort((a,b)=>(b.perf||0)-(a.perf||0)||b.price-a.price);
+ else l=l.slice().sort((a,b)=>(b.hit?1:0)-(a.hit?1:0));
+ return l;
+}
+function card(p){
+ const fav=S.fav.includes(p.id),inCart=S.cart[p.id]||0;
+ return '<div class="pc" data-act="prod" data-id="'+p.id+'">'
+  +'<div class="tile t-'+p.cat+'">'+ic(p.cat,30)+(p.old?'<span class="tag sale">−'+Math.round((1-p.price/p.old)*100)+'%</span>':(p.hit?'<span class="tag">Хит</span>':''))+'</div>'
+  +'<div class="brand-l">'+esc(p.brand)+'</div><div class="pname">'+esc(p.name)+'</div><div class="pspec">'+esc(specLine(p))+'</div>'
+  +'<div><div class="price">'+fmt(p.price)+'</div>'+(p.old?'<div class="old">'+fmt(p.old)+'</div>':'<div class="stock '+p.st+'">'+(p.st==='in'?'В наличии':'Под заказ 3–5 дней')+'</div>')+'</div>'
+  +'<div class="pfoot"><button class="btn s" data-act="addcart" data-id="'+p.id+'">'+(inCart?'В корзине · '+inCart:'В корзину')+'</button>'
+  +'<button class="hbtn" data-act="fav" data-id="'+p.id+'" aria-pressed="'+fav+'" aria-label="В избранное">'+ic('heart',18)+'</button></div></div>';
+}
+function listHtml(){
+ const l=catList();
+ if(!l.length)return '<div class="empty">'+ic('search',36)+'<div>Ничего не найдено. Измените запрос или фильтры.</div></div>';
+ return '<div class="muted sm" style="margin-bottom:8px">Найдено: '+l.length+'</div><div class="pgrid">'+l.map(card).join('')+'</div>';
+}
+function viewCatalog(){
+ const inCat=C.cat!=='all'?P.filter(p=>p.cat===C.cat):[];
+ const brands=[...new Set(inCat.map(p=>p.brand))].sort();
+ const mn=inCat.length?Math.min(...inCat.map(p=>p.price)):0,mx=inCat.length?Math.max(...inCat.map(p=>p.price)):0;
+ const hasB=Object.keys(S.build).length>0;
+ return '<div class="stack">'
+ +'<div class="search">'+ic('search',18)+'<input type="search" id="q" placeholder="Поиск: RTX 5070, AM5, DDR5, 1 ТБ…" value="'+esc(C.q)+'" data-in="q" autocomplete="off"></div>'
+ +'<div class="chips">'+[{id:'all',n:'Все'}].concat(CATS).map(c=>'<button class="chip" data-act="cat" data-v="'+c.id+'" aria-pressed="'+(C.cat===c.id)+'">'+esc(c.n)+'</button>').join('')+'</div>'
+ +'<div class="row"><select data-ch="sort" aria-label="Сортировка" class="grow"><option value="pop"'+(C.sort==='pop'?' selected':'')+'>Сначала популярные</option><option value="p1"'+(C.sort==='p1'?' selected':'')+'>Сначала дешёвые</option><option value="p2"'+(C.sort==='p2'?' selected':'')+'>Сначала дорогие</option><option value="perf"'+(C.sort==='perf'?' selected':'')+'>По мощности</option></select>'
+ +'<button class="btn ghost" data-act="filters" aria-pressed="'+C.filters+'">'+ic('filter',18)+' Фильтры</button></div>'
+ +(C.filters?'<div class="card" style="padding:14px"><div class="stack">'
+  +'<label class="check"><input type="checkbox" data-ch="stock"'+(C.stock?' checked':'')+'> Только в наличии</label>'
+  +(C.cat!=='all'?(
+   '<div><h3>Бренд</h3><div class="opts" style="margin-top:8px">'+brands.map(b=>'<button class="chip" data-act="brand" data-v="'+esc(b)+'" aria-pressed="'+C.brands.includes(b)+'">'+esc(b)+'</button>').join('')+'</div></div>'
+   +'<div><h3>Цена до: <span class="mono" id="maxl">'+fmt(C.max||mx)+'</span></h3><input type="range" min="'+mn+'" max="'+mx+'" step="1000" value="'+(C.max||mx)+'" data-in="max" aria-label="Максимальная цена"></div>'
+   +(hasB?'<label class="check"><input type="checkbox" data-ch="compat"'+(C.compat?' checked':'')+'> Подходит к моей сборке</label>':'')
+   +'<button class="btn ghost s" data-act="reset-f">Сбросить</button>'
+  ):'<div class="muted sm">Выберите категорию, чтобы фильтровать по бренду и цене.</div>')
+  +'</div></div>':'')
+ +'<div id="plist">'+listHtml()+'</div></div>';
+}
+
+function slotRow(c,o,ch){
+ const p=o[c.id],bad=ch.some(k=>k.lvl==='err'&&k.slots.includes(c.id));
+ return '<button class="slot'+(p?'':' vac')+(bad?' bad':'')+'" data-act="slot" data-s="'+c.id+'">'
+  +'<div class="tile t-'+c.id+'" style="width:44px;height:44px">'+ic(c.id,24)+'</div>'
+  +'<div class="grow"><div class="slot-n">'+c.s+(REQ.includes(c.id)?'':' · по желанию')+'</div>'
+  +(p?'<div class="slot-v">'+esc(nm(p))+'</div><div class="li-s mono">'+fmt(p.price)+'</div>':'<div class="slot-add">+ Выбрать</div>')+'</div>'
+  +(p?'<span class="rm" data-act="clr" data-s="'+c.id+'" role="button" aria-label="Убрать">'+ic('x',18)+'</span>':'')+'</button>';
+}
+const lvlIcon={ok:'check',warn:'alert',err:'x',info:'info',todo:'dot'};
+function viewBuild(){
+ const o=objs(S.build),ch=checks(o),tot=total(o),st=status(o),sc=scores(o),n=Object.keys(o).length;
+ const order={err:0,warn:1,todo:2,info:3,ok:4};
+ const sorted=ch.slice().sort((a,b)=>order[a.lvl]-order[b.lvl]);
+ return '<div class="stack">'
+ +'<div class="sec-h"><h1>Конфигуратор</h1><button class="btn ghost s" data-act="bmenu">Ещё…</button></div>'
+ +'<div class="card score"><div class="sm"><b>'+esc(sc.tier)+'</b> <span class="muted">· оценка ориентировочная</span></div>'
+ +'<div class="bar"><span>Игры</span><i><b style="width:'+sc.game+'%"></b></i><span>'+sc.game+'</span></div>'
+ +'<div class="bar"><span>Работа</span><i><b style="width:'+sc.work+'%"></b></i><span>'+sc.work+'</span></div>'
+ +(draw(o)?'<div class="sm muted">Потребление до <b class="mono">'+draw(o)+' Вт</b>'+(o.psu?' · блок питания '+o.psu.w+' Вт':', рекомендуем БП от '+recW(o)+' Вт')+'</div>':'')
+ +'</div>'
+ +'<div class="card list" style="overflow:hidden">'+CATS.map(c=>slotRow(c,o,ch)).join('')+'</div>'
+ +(ch.length?'<h3>Проверка совместимости</h3><div class="card" style="overflow:hidden">'+sorted.map(k=>'<div class="ck '+k.lvl+'">'+ic(lvlIcon[k.lvl],18)+'<div>'+esc(k.t)+'</div></div>').join('')+'</div>':'<div class="note">Начните с процессора или откройте готовую сборку во вкладке «Готовые». Приложение проверит сокет, память, размеры, охлаждение и мощность блока питания.</div>')
+ +'</div>'
+ +'<div class="buybar"><div class="wrap"><div class="grow"><div class="total">'+fmt(tot)+'</div><div class="st '+st.k+'">'+st.t+'</div></div>'
+ +'<button class="btn" data-act="build-cart"'+(n?'':' disabled')+'>'+ic('cart',18)+' В корзину</button></div></div>';
+}
+
+function presetCard(pr){
+ const o=objs(pr.b),tot=total(o),sc=scores(o),st=status(o);
+ return '<div class="card preset"><div class="sec-h"><h2>'+esc(pr.n)+'</h2><div class="price">'+fmt(tot)+'</div></div>'
+ +'<div class="opts">'+pr.tags.map(t=>'<span class="pill">'+esc(t)+'</span>').join('')+'<span class="pill">'+esc(sc.tier)+'</span></div>'
+ +'<p class="sm muted">'+esc(pr.d)+'</p>'
+ +'<div class="parts">'+CATS.filter(c=>o[c.id]).map(c=>'<div><span>'+esc(nm(o[c.id]))+'</span><span class="mono nowrap">'+fmt(o[c.id].price)+'</span></div>').join('')+'</div>'
+ +'<div class="st '+st.k+'">'+ic(st.k==='ok'?'check':'alert',16)+' '+esc(st.t)+'</div>'
+ +'<div class="grid2"><button class="btn sec" data-act="preset-open" data-id="'+pr.id+'">Изменить</button><button class="btn" data-act="preset-cart" data-id="'+pr.id+'">В корзину</button></div></div>';
+}
+const AB={budget:400000,purpose:'game',plat:'any',compact:false,res:null};
+function autoResHtml(){
+ if(!AB.res)return '';
+ const o=objs(AB.res),tot=total(o),st=status(o);
+ if(!Object.keys(o).length)return '<div class="note">Не получилось собрать ПК за такой бюджет. Попробуйте увеличить сумму.</div>';
+ return '<div class="stack" style="margin-top:12px"><div class="sec-h"><b>Подобрано на '+fmt(tot)+'</b><span class="st '+st.k+'">'+esc(st.t)+'</span></div>'
+ +'<div class="parts">'+CATS.filter(c=>o[c.id]).map(c=>'<div><span>'+esc(nm(o[c.id]))+'</span><span class="mono nowrap">'+fmt(o[c.id].price)+'</span></div>').join('')+'</div>'
+ +(tot>AB.budget?'<div class="note">Дешевле собрать не получилось: минимум для этой цели около '+fmt(tot)+'.</div>':'<div class="sm muted">Остаток: '+fmt(AB.budget-tot)+'</div>')
+ +'<div class="grid2"><button class="btn sec" data-act="auto-open">Изменить</button><button class="btn" data-act="auto-cart">В корзину</button></div></div>';
+}
+function viewPresets(){
+ const seg=(k,v,l)=>'<button data-act="ab" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(AB[k]===v)+'">'+l+'</button>';
+ return '<div class="stack"><h1>Готовые сборки</h1>'
+ +'<div class="card" style="padding:14px"><div class="stack"><h2>Подбор по бюджету</h2>'
+ +'<label class="field"><span>Бюджет, ₸</span><input type="number" inputmode="numeric" id="ab-budget" value="'+AB.budget+'" min="120000" step="10000" data-in="ab-budget"></label>'
+ +'<div class="field"><span>Для чего</span><div class="seg">'+seg('purpose','game','Игры')+seg('purpose','work','Работа')+seg('purpose','office','Офис')+'</div></div>'
+ +'<div class="field"><span>Платформа</span><div class="seg">'+seg('plat','any','Любая')+seg('plat','amd','AMD')+seg('plat','intel','Intel')+'</div></div>'
+ +'<label class="check"><input type="checkbox" data-ch="ab-compact"'+(AB.compact?' checked':'')+'> Компактный корпус (ITX)</label>'
+ +'<button class="btn block" data-act="auto-go">Подобрать сборку</button><div id="autoRes">'+autoResHtml()+'</div></div></div>'
+ +PRESETS.map(presetCard).join('')+'</div>';
+}
+
+let U={cat:'all',q:'',cond:'all',city:'all',sort:'new',mine:false};
+function usedList(){
+ let l=allUsed();
+ if(U.cat!=='all')l=l.filter(x=>x.cat===U.cat);
+ if(U.cond!=='all')l=l.filter(x=>x.cond===U.cond);
+ if(U.city!=='all')l=l.filter(x=>x.city===U.city);
+ if(U.q){const q=U.q.toLowerCase().trim();l=l.filter(x=>(x.title+' '+x.desc).toLowerCase().includes(q))}
+ if(U.sort==='p1')l.sort((a,b)=>a.price-b.price);else if(U.sort==='p2')l.sort((a,b)=>b.price-a.price);else l.sort((a,b)=>b.ts-a.ts);
+ return l;
+}
+const condCls=c=>'c'+Math.max(0,CONDS.findIndex(x=>x[0]===c));
+function usedRow(x){
+ return '<button class="li" data-act="used" data-id="'+x.id+'">'+tile(x.cat,'52px','52px',24)
+ +'<div class="grow"><div class="li-t">'+esc(x.title)+(x.sold?' <span class="cond c3">Продано</span>':'')+'</div>'
+ +'<div class="li-s">'+esc(x.city)+' · '+ago(x.ts)+(x.own?' · ваше':'')+'</div>'
+ +'<div class="row" style="margin-top:4px;gap:8px"><span class="cond '+condCls(x.cond)+'">'+esc(x.cond)+'</span><span class="price" style="font-size:.95rem">'+fmt(x.price)+'</span></div></div></button>';
+}
+function usedListHtml(){
+ const l=usedList();
+ if(!l.length)return '<div class="empty">'+ic('tag',36)+'<div>Объявлений не найдено.</div></div>';
+ return '<div class="muted sm" style="margin-bottom:8px">Объявлений: '+l.length+'</div><div class="card list" style="overflow:hidden">'+l.map(usedRow).join('')+'</div>';
+}
+function viewUsed(){
+ return '<div class="stack"><div class="sec-h"><h1>Б/у комплектующие</h1></div>'
+ +'<div class="note">Первые объявления в списке — примеры для показа. Ваши объявления сохраняются на этом телефоне.</div>'
+ +'<div class="search">'+ic('search',18)+'<input type="search" id="uq" placeholder="Поиск по объявлениям" value="'+esc(U.q)+'" data-in="uq" autocomplete="off"></div>'
+ +'<div class="chips">'+[{id:'all',n:'Все'}].concat(CATS).map(c=>'<button class="chip" data-act="ucat" data-v="'+c.id+'" aria-pressed="'+(U.cat===c.id)+'">'+esc(c.n)+'</button>').join('')+'</div>'
+ +'<div class="grid2"><select data-ch="ucond" aria-label="Состояние"><option value="all">Любое состояние</option>'+CONDS.map(c=>'<option'+(U.cond===c[0]?' selected':'')+'>'+c[0]+'</option>').join('')+'</select>'
+ +'<select data-ch="ucity" aria-label="Город"><option value="all">Все города</option>'+CITIES.map(c=>'<option'+(U.city===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'
+ +'<select data-ch="usort" aria-label="Сортировка"><option value="new"'+(U.sort==='new'?' selected':'')+'>Сначала новые</option><option value="p1"'+(U.sort==='p1'?' selected':'')+'>Сначала дешёвые</option><option value="p2"'+(U.sort==='p2'?' selected':'')+'>Сначала дорогие</option></select>'
+ +'<div id="ulist">'+usedListHtml()+'</div></div>'
+ +'<button class="btn fab" data-act="new-used">'+ic('plus',20)+' Продать своё</button>';
+}
+
+const CF={name:S.me.name||'',phone:S.me.phone||'',city:S.me.city||'Алматы',note:''};
+function viewCart(){
+ const items=cartItems(),n=items.reduce((a,i)=>a+i.q,0);
+ if(!items.length)return '<div class="empty">'+ic('cart',42)+'<h2>Корзина пуста</h2><p class="muted" style="margin:6px 0 16px">Добавьте комплектующие из каталога или откройте готовую сборку.</p><div class="grid2"><button class="btn" data-act="tab" data-v="catalog">В каталог</button><button class="btn sec" data-act="tab" data-v="presets">Готовые сборки</button></div></div>';
+ const parts=cartParts(),disc=PROMOS[(S.promo||'').toUpperCase()]||0;
+ const svcs=SVC.filter(s=>S.svc[s.id]&&n>=s.min),svcT=svcs.reduce((a,s)=>a+s.p,0);
+ const del=DEL.find(d=>d.id===S.del)||DEL[0];
+ const sum=Math.round(parts*(1-disc))+svcT+del.p;
+ return '<div class="stack"><div class="sec-h"><h1>Корзина</h1><button class="btn ghost s" data-act="cart-clear">Очистить</button></div>'
+ +'<div class="card list" style="overflow:hidden">'+items.map(i=>'<div class="li" style="cursor:default">'+tile(i.p.cat,'48px','48px',22)
+  +'<div class="grow"><div class="li-t">'+esc(nm(i.p))+'</div><div class="li-s mono">'+fmt(i.p.price)+'</div>'
+  +'<div class="row" style="margin-top:6px"><div class="qty"><button data-act="qty" data-id="'+i.p.id+'" data-d="-1" aria-label="Меньше">−</button><span>'+i.q+'</span><button data-act="qty" data-id="'+i.p.id+'" data-d="1" aria-label="Больше">+</button></div><span class="price grow" style="text-align:right">'+fmt(i.p.price*i.q)+'</span></div></div></div>').join('')+'</div>'
+ +'<h3>Услуги</h3><div class="card" style="padding:4px 14px">'+SVC.map(s=>{const ok=n>=s.min;return '<label class="check" style="'+(ok?'':'opacity:.5')+'"><input type="checkbox" data-ch="svc" data-id="'+s.id+'"'+(S.svc[s.id]&&ok?' checked':'')+(ok?'':' disabled')+'><span class="grow"><b>'+s.n+'</b><br><span class="muted sm">'+s.d+(ok?'':' (от '+s.min+' позиций)')+'</span></span><span class="mono nowrap">+'+fmt(s.p)+'</span></label>'}).join('')+'</div>'
+ +'<h3>Получение и оплата</h3><div class="card" style="padding:14px"><div class="stack">'
+ +'<label class="field"><span>Доставка</span><select data-ch="del">'+DEL.map(d=>'<option value="'+d.id+'"'+(S.del===d.id?' selected':'')+'>'+d.n+(d.p?' (+'+fmt(d.p)+')':'')+'</option>').join('')+'</select></label>'
+ +'<label class="field"><span>Оплата</span><select data-ch="pay">'+PAY.map(p=>'<option'+(S.pay===p?' selected':'')+'>'+p+'</option>').join('')+'</select></label>'
+ +'<label class="field"><span>Промокод</span><input type="text" id="promo" value="'+esc(S.promo)+'" placeholder="Например PCMARKET5" data-in="promo" data-ch="promo" autocomplete="off" autocapitalize="characters">'+(disc?'<span class="st ok">Скидка '+Math.round(disc*100)+'% на комплектующие</span>':'')+'</label>'
+ +'</div></div>'
+ +'<h3>Ваши данные</h3><div class="card" style="padding:14px"><div class="stack">'
+ +'<label class="field"><span>Имя</span><input type="text" id="o-name" value="'+esc(CF.name)+'" data-in="cf" data-k="name" autocomplete="name"></label>'
+ +'<label class="field"><span>Телефон</span><input type="tel" id="o-phone" value="'+esc(CF.phone)+'" data-in="cf" data-k="phone" placeholder="+7 7XX XXX XX XX" autocomplete="tel"></label>'
+ +'<label class="field"><span>Город</span><select id="o-city" data-in="cf" data-k="city">'+CITIES.map(c=>'<option'+(CF.city===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label>'
+ +'<label class="field"><span>Комментарий</span><textarea id="o-note" data-in="cf" data-k="note" placeholder="Пожелания по сборке, удобное время">'+esc(CF.note)+'</textarea></label></div></div>'
+ +'<div class="card" style="padding:14px"><div class="sumrow"><span>Комплектующие ('+n+')</span><span class="mono">'+fmt(parts)+'</span></div>'
+ +(disc?'<div class="sumrow"><span>Скидка</span><span class="mono">−'+fmt(parts*disc)+'</span></div>':'')
+ +svcs.map(s=>'<div class="sumrow"><span>'+s.n+'</span><span class="mono">'+fmt(s.p)+'</span></div>').join('')
+ +'<div class="sumrow"><span>'+del.n+'</span><span class="mono">'+(del.p?fmt(del.p):'бесплатно')+'</span></div>'
+ +'<div class="sumrow big"><span>Итого</span><span class="mono">'+fmt(sum)+'</span></div></div>'
+ +'<button class="btn block" data-act="order">Оформить заказ</button></div>';
+}
+function orderTotals(){
+ const items=cartItems(),n=items.reduce((a,i)=>a+i.q,0),parts=cartParts(),disc=PROMOS[(S.promo||'').toUpperCase()]||0;
+ const svcs=SVC.filter(s=>S.svc[s.id]&&n>=s.min),del=DEL.find(d=>d.id===S.del)||DEL[0];
+ return{items,n,parts,disc,svcs,del,sum:Math.round(parts*(1-disc))+svcs.reduce((a,s)=>a+s.p,0)+del.p};
+}
+function orderText(o){
+ let t='Заказ '+o.id+'\nИмя: '+o.name+'\nТелефон: '+o.phone+'\nГород: '+o.city+'\nДоставка: '+o.del+'\nОплата: '+o.pay+'\n\n';
+ t+=o.items.map((i,k)=>(k+1)+'. '+i.name+' × '+i.q+' — '+fmt(i.price*i.q)).join('\n');
+ if(o.svc.length)t+='\n\nУслуги: '+o.svc.join(', ');
+ if(o.promo)t+='\nПромокод: '+o.promo;
+ if(o.note)t+='\nКомментарий: '+o.note;
+ return t+'\n\nИтого: '+fmt(o.total);
+}
+const waLink=(text)=>'https://wa.me/'+digits(S.wa)+'?text='+encodeURIComponent(text);
+
+let PT='fav';
+function miniRow(p){return '<button class="li" data-act="prod" data-id="'+p.id+'">'+tile(p.cat,'48px','48px',22)+'<div class="grow"><div class="li-t">'+esc(nm(p))+'</div><div class="li-s">'+esc(specLine(p))+'</div></div><div class="price" style="font-size:.9rem">'+fmt(p.price)+'</div></button>'}
+function viewProfile(){
+ const tabs=[['fav','Избранное'],['orders','Заказы'],['builds','Сборки'],['mine','Мои объявления'],['set','Настройки']];
+ let body='';
+ if(PT==='fav'){
+  const f=S.fav.map(id=>byId[id]).filter(Boolean),fu=allUsed().filter(x=>S.favUsed.includes(x.id));
+  body=(f.length||fu.length)?(f.length?'<div class="card list" style="overflow:hidden">'+f.map(miniRow).join('')+'</div>':'')+(fu.length?'<h3>Б/у</h3><div class="card list" style="overflow:hidden">'+fu.map(usedRow).join('')+'</div>':''):'<div class="empty">'+ic('heart',36)+'<div>Здесь появятся товары, отмеченные сердечком.</div></div>';
+ }else if(PT==='orders'){
+  body=S.orders.length?S.orders.map(o=>'<div class="card" style="padding:14px"><div class="stack"><div class="sec-h"><b class="mono">'+esc(o.id)+'</b><span class="pill">'+esc(o.status)+'</span></div><div class="muted sm">'+new Date(o.ts).toLocaleDateString('ru-RU')+' · '+esc(o.del)+' · '+esc(o.pay)+'</div><div class="parts">'+o.items.map(i=>'<div><span>'+esc(i.name)+' × '+i.q+'</span><span class="mono nowrap">'+fmt(i.price*i.q)+'</span></div>').join('')+'</div><div class="sumrow big"><span>Итого</span><span class="mono">'+fmt(o.total)+'</span></div><div class="grid2"><button class="btn sec s" data-act="order-again" data-id="'+o.id+'">Повторить</button><button class="btn sec s" data-act="order-send" data-id="'+o.id+'">Отправить</button></div></div></div>').join(''):'<div class="empty">'+ic('cart',36)+'<div>Заказов пока нет.</div></div>';
+ }else if(PT==='builds'){
+  body=S.builds.length?S.builds.map((b,i)=>{const o=objs(b.parts);return '<div class="card" style="padding:14px"><div class="stack"><div class="sec-h"><b>'+esc(b.name)+'</b><span class="price">'+fmt(total(o))+'</span></div><div class="parts">'+CATS.filter(c=>o[c.id]).map(c=>'<div><span>'+esc(nm(o[c.id]))+'</span></div>').join('')+'</div><div class="grid2"><button class="btn sec s" data-act="build-load" data-i="'+i+'">Открыть</button><button class="btn danger s" data-act="build-del" data-i="'+i+'">Удалить</button></div></div></div>'}).join(''):'<div class="empty">'+ic('wrench',36)+'<div>Сохранённых сборок нет. Соберите ПК и нажмите «Ещё…» → «Сохранить».</div></div>';
+ }else if(PT==='mine'){
+  const m=S.listings.map(x=>Object.assign({own:1},x));
+  body=(m.length?'<div class="card list" style="overflow:hidden">'+m.map(usedRow).join('')+'</div>':'<div class="empty">'+ic('tag',36)+'<div>Вы пока ничего не продаёте.</div></div>')+'<button class="btn block" data-act="new-used">'+ic('plus',18)+' Разместить объявление</button>';
+ }else{
+  body='<div class="card" style="padding:14px"><div class="stack">'
+  +'<label class="field"><span>Тема</span><select data-ch="theme"><option value="auto"'+(S.theme==='auto'?' selected':'')+'>Как в системе</option><option value="light"'+(S.theme==='light'?' selected':'')+'>Светлая</option><option value="dark"'+(S.theme==='dark'?' selected':'')+'>Тёмная</option></select></label>'
+  +'<label class="field"><span>WhatsApp магазина (для отправки заказов)</span><input type="tel" id="s-wa" value="'+esc(S.wa)+'" placeholder="77001234567" data-in="wa"></label>'
+  +'<div class="muted sm">Укажите номер в международном формате без плюса. Тогда кнопка «Отправить в WhatsApp» откроет чат с готовым текстом заказа.</div>'
+  +(deferredPrompt?'<button class="btn" data-act="install">'+ic('download',18)+' Установить приложение</button>':'<div class="muted sm">Чтобы установить на главный экран: меню браузера → «Добавить на главный экран» или «Установить приложение».</div>')
+  +'<button class="btn danger" data-act="reset" id="resetBtn">Удалить все данные на телефоне</button></div></div>'
+  +'<div class="note">Цены в каталоге примерные, в тенге. Все данные (корзина, сборки, заказы, объявления) хранятся только на этом устройстве.</div>';
+ }
+ return '<div class="stack"><h1>Профиль</h1><div class="seg">'+tabs.map(t=>'<button data-act="ptab" data-v="'+t[0]+'" aria-pressed="'+(PT===t[0])+'">'+t[1]+'</button>').join('')+'</div>'+body+'</div>';
+}
+const VIEWS={catalog:viewCatalog,build:viewBuild,presets:viewPresets,used:viewUsed,cart:viewCart,profile:viewProfile};
+function render(){
+ if(!VIEWS[T])T='catalog';
+ const v=$('#view');v.innerHTML=VIEWS[T]();
+ v.classList.toggle('has-bar',T==='build');
+ $('#nav').innerHTML=TABS.map(t=>'<button data-act="tab" data-v="'+t[0]+'"'+(t[0]===T?' aria-current="page"':'')+'>'+ic(t[2],22)+'<span>'+t[1]+'</span></button>').join('');
+ const c=cartCount();$('#cartBadge').textContent=c?String(c):'';
+ applyTheme();
+}
+function applyTheme(){
+ const r=document.documentElement;if(S.theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',S.theme);
+ const dark=S.theme==='dark'||(S.theme==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);
+ $('#themeBtn').innerHTML=ic(dark?'sun':'moon',22);
+ if(!$('#cartBtn svg'))$('#cartBtn').insertAdjacentHTML('afterbegin',ic('cart',24));
+ if(!$('#logo').firstChild)$('#logo').innerHTML=ic('cpu',20);
+}
+
+/* ============================ SHEETS ============================ */
+function shHead(t){return '<div class="sh-h"><h2>'+t+'</h2><button class="ib" data-act="close" aria-label="Закрыть">'+ic('x',22)+'</button></div>'}
+function prodSheet(id){
+ return ()=>{
+  const p=byId[id],fav=S.fav.includes(id),inB=S.build[p.cat]===id;
+  const sim=P.filter(x=>x.cat===p.cat&&x.id!==p.id).sort((a,b)=>Math.abs(a.price-p.price)-Math.abs(b.price-p.price)).slice(0,3);
+  return shHead(esc(p.brand))+'<div class="stack">'
+  +'<div class="det-tile tile t-'+p.cat+'" style="width:100%">'+ic(p.cat,52)+'</div>'
+  +'<div><h1>'+esc(p.name)+'</h1><div class="muted sm" style="margin-top:4px">'+esc(catById[p.cat].s)+'</div></div>'
+  +'<div class="row"><div class="price" style="font-size:1.4rem">'+fmt(p.price)+'</div>'+(p.old?'<div class="old">'+fmt(p.old)+'</div>':'')+'<div class="stock '+p.st+' grow" style="text-align:right">'+(p.st==='in'?'В наличии':'Под заказ 3–5 дней')+'</div></div>'
+  +'<div class="grid2"><button class="btn" data-act="addcart" data-id="'+id+'">В корзину</button><button class="btn sec" data-act="tobuild" data-id="'+id+'">'+(inB?'В сборке ✓':'В сборку')+'</button></div>'
+  +'<button class="btn ghost" data-act="fav" data-id="'+id+'">'+ic('heart',18)+' '+(fav?'Убрать из избранного':'В избранное')+'</button>'
+  +'<dl class="specs">'+specRows(p).map(r=>'<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>').join('')+'</dl>'
+  +'<h3>Похожие</h3><div class="card list" style="overflow:hidden">'+sim.map(miniRow).join('')+'</div></div>';
+ };
+}
+const PK={slot:'cpu',q:'',only:true,sort:'p1'};
+function pickItems(){
+ const cat=PK.slot,cur=S.build[cat];
+ let l=P.filter(p=>p.cat===cat).map(p=>({p,why:okWith(cat,p,S.build)}));
+ if(PK.q){const q=PK.q.toLowerCase();l=l.filter(x=>(nm(x.p)+' '+specLine(x.p)).toLowerCase().includes(q))}
+ if(PK.only)l=l.filter(x=>!x.why.length);
+ if(PK.sort==='p1')l.sort((a,b)=>a.p.price-b.p.price);else if(PK.sort==='p2')l.sort((a,b)=>b.p.price-a.p.price);else l.sort((a,b)=>(b.p.perf||b.p.cap||b.p.w||0)-(a.p.perf||a.p.cap||a.p.w||0));
+ if(!l.length)return '<div class="empty">Подходящих вариантов нет. Выключите фильтр совместимости или измените другие детали сборки.</div>';
+ return '<div class="card list" style="overflow:hidden">'+l.map(x=>'<button class="li'+(x.why.length?' dis':'')+'" data-act="choose" data-id="'+x.p.id+'">'+tile(x.p.cat,'48px','48px',22)
+  +'<div class="grow"><div class="li-t">'+esc(nm(x.p))+(cur===x.p.id?' ✓':'')+'</div><div class="li-s">'+esc(specLine(x.p))+'</div>'+(x.why.length?'<div class="why">'+esc(x.why[0])+'</div>':'')+'</div>'
+  +'<div class="price" style="font-size:.9rem">'+fmt(x.p.price)+'</div></button>').join('')+'</div>';
+}
+function pickSheet(){
+ return shHead('Выбор: '+esc(catById[PK.slot].s))+'<div class="stack">'
+ +'<div class="search">'+ic('search',18)+'<input type="search" id="pq" placeholder="Поиск" value="'+esc(PK.q)+'" data-in="pq" autocomplete="off"></div>'
+ +'<div class="row"><select data-ch="psort" class="grow" aria-label="Сортировка"><option value="p1"'+(PK.sort==='p1'?' selected':'')+'>Сначала дешёвые</option><option value="p2"'+(PK.sort==='p2'?' selected':'')+'>Сначала дорогие</option><option value="perf"'+(PK.sort==='perf'?' selected':'')+'>По мощности</option></select></div>'
+ +'<label class="check"><input type="checkbox" data-ch="ponly"'+(PK.only?' checked':'')+'> Только совместимые с моей сборкой</label>'
+ +'<div id="pickList">'+pickItems()+'</div>'
+ +(S.build[PK.slot]?'<button class="btn danger" data-act="clr" data-s="'+PK.slot+'">Убрать из сборки</button>':'')+'</div>';
+}
+function usedSheet(id){
+ return ()=>{
+  const x=allUsed().find(u=>u.id===id);if(!x)return shHead('Объявление')+'<div class="empty">Объявление не найдено.</div>';
+  const fav=S.favUsed.includes(id),d=digits(x.phone),catp=P.filter(p=>p.cat===x.cat);
+  return shHead(esc(catById[x.cat].s))+'<div class="stack">'
+  +'<div class="det-tile tile t-'+x.cat+'" style="width:100%">'+ic(x.cat,52)+'</div>'
+  +'<div><h1>'+esc(x.title)+'</h1><div class="muted sm" style="margin-top:4px">'+esc(x.city)+' · '+ago(x.ts)+(x.demo?' · пример':'')+'</div></div>'
+  +'<div class="row"><div class="price" style="font-size:1.4rem">'+fmt(x.price)+'</div><span class="cond '+condCls(x.cond)+'">'+esc(x.cond)+'</span>'+(x.sold?'<span class="cond c3">Продано</span>':'')+'</div>'
+  +'<p>'+esc(x.desc||'Без описания.')+'</p>'
+  +'<dl class="specs"><dt>Куплено</dt><dd>'+esc(x.age||'—')+' назад</dd><dt>Гарантия продавца</dt><dd>'+esc(x.war||'Нет')+'</dd><dt>Продавец</dt><dd>'+esc(x.seller||'Вы')+'</dd><dt>Телефон</dt><dd class="mono">'+esc(x.phone)+'</dd></dl>'
+  +(x.demo?'<div class="note">Это пример объявления, номер телефона не настоящий.</div>':'<div class="grid2"><a class="btn" href="tel:+'+d+'">'+ic('phone',18)+' Позвонить</a><a class="btn sec" target="_blank" rel="noopener" href="https://wa.me/'+d+'">WhatsApp</a></div>')
+  +'<div class="grid2"><button class="btn sec" data-act="copy" data-v="'+esc(x.phone)+'">'+ic('copy',18)+' Номер</button><button class="btn sec" data-act="ufav" data-id="'+id+'">'+ic('heart',18)+' '+(fav?'Убрать':'Сохранить')+'</button></div>'
+  +(x.own?'<div class="grid2"><button class="btn sec" data-act="usold" data-id="'+id+'">'+(x.sold?'Вернуть в продажу':'Отметить проданным')+'</button><button class="btn danger" data-act="udel" data-id="'+id+'">Удалить</button></div>':'')
+  +'<div class="note"><b>Безопасная сделка.</b> Встречайтесь в людном месте, просите запустить деталь при вас, не вносите предоплату незнакомым людям.</div>'
+  +'</div>';
+ };
+}
+function priceHint(title,cond){
+ const t=(title||'').toLowerCase().trim();if(t.length<3)return '';
+ const words=t.split(/[\s,]+/).filter(w=>w.length>2);
+ const nums=words.filter(w=>/\d/.test(w));
+ if(!nums.length)return '';
+ let best=null,sc=0;
+ for(const p of P){const n=nm(p).toLowerCase();if(!nums.every(w=>n.includes(w)))continue;let s=0;for(const w of words)if(n.includes(w))s++;if(s>sc){sc=s;best=p}}
+ if(!best||sc<2)return '';
+ const f=(CONDS.find(c=>c[0]===cond)||CONDS[1])[1];
+ return 'Новый «'+nm(best)+'» стоит '+fmt(best.price)+'. Для состояния «'+cond+'» ориентир: '+fmt(Math.round(best.price*f*.9/1000)*1000)+' – '+fmt(Math.round(best.price*f*1.05/1000)*1000);
+}
+function newUsedSheet(){
+ return shHead('Новое объявление')+'<form class="stack" id="uform" novalidate>'
+ +'<label class="field"><span>Категория</span><select id="ul-cat">'+CATS.map(c=>'<option value="'+c.id+'">'+c.s+'</option>').join('')+'</select></label>'
+ +'<label class="field"><span>Название</span><input type="text" id="ul-title" placeholder="Например: RTX 3060 Ti 8GB MSI" data-in="ul-title" autocomplete="off"></label>'
+ +'<label class="field"><span>Состояние</span><select id="ul-cond" data-ch="ul-cond">'+CONDS.map((c,i)=>'<option'+(i===1?' selected':'')+'>'+c[0]+'</option>').join('')+'</select></label>'
+ +'<div class="note" id="ul-hint" hidden></div>'
+ +'<label class="field"><span>Цена, ₸</span><input type="number" inputmode="numeric" id="ul-price" min="0" step="500"></label>'
+ +'<div class="grid2"><label class="field"><span>Возраст детали</span><input type="text" id="ul-age" placeholder="2 года"></label>'
+ +'<label class="field"><span>Гарантия</span><select id="ul-war"><option>Нет</option><option>1 месяц</option><option>3 месяца</option><option>6 месяцев</option></select></label></div>'
+ +'<div class="grid2"><label class="field"><span>Город</span><select id="ul-city">'+CITIES.map(c=>'<option'+(S.me.city===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label>'
+ +'<label class="field"><span>Телефон</span><input type="tel" id="ul-phone" value="'+esc(S.me.phone)+'" placeholder="+7 7XX XXX XX XX"></label></div>'
+ +'<label class="field"><span>Описание</span><textarea id="ul-desc" placeholder="Как использовалась, есть ли коробка, чек, что проверено"></textarea></label>'
+ +'<button class="btn block" type="submit">Опубликовать</button></form>';
+}
+function menuSheet(){
+ const o=objs(S.build),has=Object.keys(o).length>0;
+ return shHead('Сборка')+'<div class="stack">'
+ +'<label class="field"><span>Название сборки</span><input type="text" id="bname" placeholder="Например: Игровой для брата"></label>'
+ +'<button class="btn" data-act="bsave"'+(has?'':' disabled')+'>'+ic('save',18)+' Сохранить сборку</button>'
+ +'<button class="btn sec" data-act="bshare"'+(has?'':' disabled')+'>'+ic('share',18)+' Поделиться списком</button>'
+ +'<button class="btn sec" data-act="tab" data-v="presets">Готовые сборки и автоподбор</button>'
+ +'<button class="btn danger" data-act="bclear"'+(has?'':' disabled')+'>Очистить сборку</button></div>';
+}
+function buildText(){
+ const o=objs(S.build);
+ return 'Сборка ПК · PC Маркет\n'+CATS.filter(c=>o[c.id]).map(c=>c.s+': '+nm(o[c.id])+' — '+fmt(o[c.id].price)).join('\n')+'\n\nИтого: '+fmt(total(o));
+}
+function copyText(t){
+ const fb=()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Скопировано')}catch(e){toast('Не удалось скопировать')}a.remove()};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast('Скопировано'),fb);else fb();
+}
+
+/* ============================ ACTIONS ============================ */
+let deferredPrompt=null;
+function addCart(id,q){S.cart[id]=(S.cart[id]||0)+(q||1);save()}
+function afterChange(){render();refreshSheet()}
+const ACT={
+ tab:t=>setTab(t.dataset.v),
+ close:()=>closeSheet(),
+ theme:()=>{const dark=S.theme==='dark'||(S.theme==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);S.theme=dark?'light':'dark';save();applyTheme()},
+ cat:t=>{C.cat=t.dataset.v;C.brands=[];C.max=0;C.compat=false;render()},
+ filters:()=>{C.filters=!C.filters;render()},
+ brand:t=>{const b=t.dataset.v,i=C.brands.indexOf(b);i<0?C.brands.push(b):C.brands.splice(i,1);render()},
+ 'reset-f':()=>{C.brands=[];C.max=0;C.stock=false;C.compat=false;render()},
+ prod:t=>openSheet(prodSheet(t.dataset.id)),
+ addcart:t=>{addCart(t.dataset.id);toast('Добавлено в корзину');afterChange()},
+ fav:t=>{const id=t.dataset.id,i=S.fav.indexOf(id);i<0?S.fav.push(id):S.fav.splice(i,1);save();toast(i<0?'В избранном':'Убрано из избранного');afterChange()},
+ tobuild:t=>{const p=byId[t.dataset.id],why=okWith(p.cat,p,S.build);if(why.length){toast(why[0]);return}S.build[p.cat]=p.id;save();toast('Добавлено в сборку: '+catById[p.cat].s);afterChange()},
+ slot:t=>{PK.slot=t.dataset.s;PK.q='';openSheet(pickSheet)},
+ choose:t=>{const p=byId[t.dataset.id],why=okWith(p.cat,p,S.build);if(why.length){toast(why[0]);return}S.build[p.cat]=p.id;save();closeSheet();render()},
+ clr:(t,e)=>{e.stopPropagation();delete S.build[t.dataset.s];save();if(sheetOpen)closeSheet();render()},
+ bmenu:()=>openSheet(menuSheet),
+ bsave:()=>{const n=($('#bname').value||'').trim()||('Сборка '+(S.builds.length+1));S.builds.unshift({name:n,parts:Object.assign({},S.build),ts:Date.now()});save();closeSheet();toast('Сборка сохранена в профиле')},
+ bshare:()=>{const t=buildText();if(navigator.share){navigator.share({title:'Сборка ПК',text:t}).catch(()=>{})}else copyText(t)},
+ bclear:()=>{S.build={};save();closeSheet();render();toast('Сборка очищена')},
+ 'build-cart':()=>{
+  const o=objs(S.build),e=errs(o);Object.values(o).forEach(p=>{if(!S.cart[p.id])S.cart[p.id]=1});
+  if(Object.keys(o).length>=3)S.svc.assembly=true;save();
+  toast(e.length?'Добавлено, но в сборке есть конфликты':'Сборка добавлена в корзину');setTab('cart');
+ },
+ 'preset-open':t=>{const pr=PRESETS.find(x=>x.id===t.dataset.id);S.build=Object.assign({},pr.b);save();toast('Сборка открыта в конфигураторе');setTab('build')},
+ 'preset-cart':t=>{const pr=PRESETS.find(x=>x.id===t.dataset.id);Object.values(pr.b).forEach(id=>{if(!S.cart[id])S.cart[id]=1});S.svc.assembly=true;save();toast('Сборка добавлена в корзину');setTab('cart')},
+ ab:t=>{AB[t.dataset.k]=t.dataset.v;AB.res=null;render()},
+ 'auto-go':()=>{const v=parseInt($('#ab-budget').value,10);if(!(v>=100000)){toast('Укажите бюджет от 100 000 ₸');return}AB.budget=v;AB.res=autoBuild(v,AB.purpose,AB.plat,AB.compact);$('#autoRes').innerHTML=autoResHtml()},
+ 'auto-open':()=>{S.build=Object.assign({},AB.res);save();setTab('build')},
+ 'auto-cart':()=>{Object.values(AB.res).forEach(id=>{if(!S.cart[id])S.cart[id]=1});S.svc.assembly=true;save();toast('Добавлено в корзину');setTab('cart')},
+ ucat:t=>{U.cat=t.dataset.v;render()},
+ used:t=>openSheet(usedSheet(t.dataset.id)),
+ 'new-used':()=>openSheet(newUsedSheet),
+ ufav:t=>{const id=t.dataset.id,i=S.favUsed.indexOf(id);i<0?S.favUsed.push(id):S.favUsed.splice(i,1);save();toast(i<0?'Сохранено':'Убрано');afterChange()},
+ usold:t=>{const x=S.listings.find(l=>l.id===t.dataset.id);if(x){x.sold=!x.sold;save();afterChange()}},
+ udel:t=>{S.listings=S.listings.filter(l=>l.id!==t.dataset.id);save();closeSheet();render();toast('Объявление удалено')},
+ copy:t=>copyText(t.dataset.v),
+ qty:t=>{const id=t.dataset.id,n=(S.cart[id]||0)+parseInt(t.dataset.d,10);if(n<=0)delete S.cart[id];else S.cart[id]=Math.min(n,20);save();render()},
+ 'cart-clear':()=>{S.cart={};S.svc={};save();render()},
+ order:()=>{
+  const name=$('#o-name').value.trim(),phone=$('#o-phone').value.trim(),city=$('#o-city').value,note=$('#o-note').value.trim();
+  Object.assign(CF,{name,phone,city});CF.note='';
+  if(name.length<2){toast('Укажите имя');return}
+  if(digits(phone).length<10){toast('Укажите телефон полностью');return}
+  S.me={name,phone,city};const k=orderTotals();
+  const o={id:'PC-'+Date.now().toString(36).slice(-5).toUpperCase(),ts:Date.now(),name,phone,city,note,del:k.del.n,pay:S.pay,promo:k.disc?(S.promo||'').toUpperCase():'',svc:k.svcs.map(s=>s.n),items:k.items.map(i=>({id:i.p.id,q:i.q,name:nm(i.p),price:i.p.price})),total:k.sum,status:'Новый'};
+  S.orders.unshift(o);S.cart={};S.svc={};S.promo='';save();render();
+  openSheet(()=>orderDoneSheet(o));
+ },
+ 'order-wa':t=>{const o=S.orders.find(x=>x.id===t.dataset.id);if(!o)return;if(digits(S.wa).length<10){closeSheet();PT='set';setTab('profile');toast('Сначала укажите WhatsApp магазина');return}window.open(waLink(orderText(o)),'_blank','noopener')},
+ 'order-copy':t=>{const o=S.orders.find(x=>x.id===t.dataset.id);if(o)copyText(orderText(o))},
+ 'order-send':t=>ACT['order-wa'](t),
+ 'order-again':t=>{const o=S.orders.find(x=>x.id===t.dataset.id);if(!o)return;o.items.forEach(i=>{if(byId[i.id])addCart(i.id,i.q)});toast('Товары добавлены в корзину');setTab('cart')},
+ ptab:t=>{PT=t.dataset.v;render()},
+ 'build-load':t=>{S.build=Object.assign({},S.builds[+t.dataset.i].parts);save();setTab('build')},
+ 'build-del':t=>{S.builds.splice(+t.dataset.i,1);save();render()},
+ install:()=>{if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.finally(()=>{deferredPrompt=null;render()})},
+ reset:t=>{
+  if(!t.dataset.armed){t.dataset.armed='1';t.textContent='Нажмите ещё раз, чтобы удалить всё';setTimeout(()=>{if(t.isConnected){delete t.dataset.armed;t.textContent='Удалить все данные на телефоне'}},4000);return}
+  S=JSON.parse(JSON.stringify(DEF));save();PT='fav';render();toast('Данные удалены');
+ }
+};
+function orderDoneSheet(o){
+ return shHead('Заказ оформлен')+'<div class="stack"><div class="note"><b class="mono">'+esc(o.id)+'</b> · '+fmt(o.total)+'<br>Заказ сохранён в профиле. Отправьте его магазину, чтобы мы подтвердили наличие и срок.</div>'
+ +'<button class="btn" data-act="order-wa" data-id="'+o.id+'">Отправить в WhatsApp</button>'
+ +'<button class="btn sec" data-act="order-copy" data-id="'+o.id+'">'+ic('copy',18)+' Скопировать текст заказа</button>'
+ +'<button class="btn ghost" data-act="close">Готово</button></div>';
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-act]');if(!t)return;
+ const a=t.dataset.act;
+ if(a==='prod'&&e.target.closest('[data-act="addcart"],[data-act="fav"]'))return;
+ if(a==='slot'&&e.target.closest('[data-act="clr"]'))return;
+ const h=ACT[a];if(h)h(t,e);
+});
+const INP={
+ q:t=>{C.q=t.value;$('#plist').innerHTML=listHtml()},
+ max:t=>{C.max=+t.value;$('#maxl').textContent=fmt(C.max);$('#plist').innerHTML=listHtml()},
+ uq:t=>{U.q=t.value;$('#ulist').innerHTML=usedListHtml()},
+ pq:t=>{PK.q=t.value;$('#pickList').innerHTML=pickItems()},
+ promo:t=>{S.promo=t.value.trim();save()},
+ cf:t=>{CF[t.dataset.k]=t.value},
+ wa:t=>{S.wa=digits(t.value);save()},
+ 'ul-title':()=>updHint(),
+ 'ab-budget':t=>{AB.budget=parseInt(t.value,10)||0}
+};
+function updHint(){const h=$('#ul-hint');if(!h)return;const s=priceHint($('#ul-title').value,$('#ul-cond').value);h.hidden=!s;h.textContent=s}
+const CHG={
+ sort:t=>{C.sort=t.value;render()},
+ stock:t=>{C.stock=t.checked;render()},
+ compat:t=>{C.compat=t.checked;render()},
+ ucond:t=>{U.cond=t.value;render()},ucity:t=>{U.city=t.value;render()},usort:t=>{U.sort=t.value;render()},
+ 'ab-compact':t=>{AB.compact=t.checked;AB.res=null;$('#autoRes').innerHTML=''},
+ promo:()=>render(),
+ svc:t=>{S.svc[t.dataset.id]=t.checked;save();render()},
+ del:t=>{S.del=t.value;save();render()},
+ pay:t=>{S.pay=t.value;save()},
+ theme:t=>{S.theme=t.value;save();applyTheme()},
+ psort:t=>{PK.sort=t.value;refreshSheet()},
+ ponly:t=>{PK.only=t.checked;refreshSheet()},
+ 'ul-cond':()=>updHint()
+};
+document.addEventListener('input',e=>{const t=e.target.closest('[data-in]');if(t&&INP[t.dataset.in])INP[t.dataset.in](t,e)});
+document.addEventListener('change',e=>{const t=e.target.closest('[data-ch]');if(t&&CHG[t.dataset.ch])CHG[t.dataset.ch](t,e)});
+document.addEventListener('submit',e=>{
+ if(e.target.id!=='uform')return;e.preventDefault();
+ const g=id=>$('#'+id).value.trim();
+ const title=g('ul-title'),price=parseInt(g('ul-price'),10),phone=g('ul-phone');
+ if(title.length<3){toast('Укажите название');return}
+ if(!(price>0)){toast('Укажите цену');return}
+ if(digits(phone).length<10){toast('Укажите телефон полностью');return}
+ S.me.phone=phone;S.me.city=g('ul-city');
+ S.listings.unshift({id:'m'+Date.now().toString(36),cat:g('ul-cat'),title,price,cond:g('ul-cond'),age:g('ul-age'),war:g('ul-war'),city:g('ul-city'),seller:S.me.name||'Вы',phone,desc:g('ul-desc'),ts:Date.now()});
+ save();U={cat:'all',q:'',cond:'all',city:'all',sort:'new',mine:false};closeSheet();toast('Объявление опубликовано на этом телефоне');
+ if(T!=='used')setTab('used');else render();
+});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(T==='profile')render()});
+
+/* ============================ START ============================ */
+(function init(){
+ try{const q=new URLSearchParams(location.search).get('tab');if(q&&VIEWS[q])T=q}catch(e){}
+ try{history.replaceState({t:T},'')}catch(e){}
+ render();
+ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  /*__SW__*/navigator.serviceWorker.register('sw.js').catch(()=>{});
+ }
+})();
+</script>
+</body>
+</html>
